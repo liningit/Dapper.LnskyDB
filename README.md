@@ -1,6 +1,6 @@
 # LnskyDB
 
-LnskyDB是基于Dapper的Lambda扩,支持按时间分库分表,也可以自定义分库分表方法
+LnskyDB是基于Dapper的Lambda扩展,支持按时间分库分表,也可以自定义分库分表方法
 
 在此非常感谢SkyChenSky其中lambda表达式的解析参考了他的开源项目
 
