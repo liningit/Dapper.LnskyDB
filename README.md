@@ -1,6 +1,7 @@
 # LnskyDB
 
 LnskyDB是基于Dapper的linq扩展支持按时间分库分表,也可以自定义分库分表方法
+在此非常感谢SkyChenSky其中lambda表达式的解析参考了他的开源项目
 下面是用ProductSaleByDayEntity作为示例,其中StatisticalDate为分库分表字段,如果是对分库分表对象进行数据库操作则必须传入StatisticalDate或者设置DBModel_ShuffledTempDate指定是那个库和表
 
 ------------
