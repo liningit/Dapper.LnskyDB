@@ -15,9 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Model\Service.tt">
+    <None Update="T4\Entity.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Service.cs</LastGenOutput>
+      <LastGenOutput>Entity.cs</LastGenOutput>
     </None>
   </ItemGroup>
 
@@ -26,10 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Model\Service.cs">
+    <Compile Update="T4\Entity.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>Service.tt</DependentUpon>
+      <DependentUpon>Entity.tt</DependentUpon>
     </Compile>
   </ItemGroup>
 

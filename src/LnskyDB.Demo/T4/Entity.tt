@@ -11,8 +11,8 @@
 <#@ import namespace="System.Data.SqlClient" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.IO" #>
-<#@ include file="$(ProjectDir)Model/Manager.ttinclude"	#>
-<#@ include file="$(ProjectDir)Model/DbHelper.ttinclude"	#>
+<#@ include file="$(ProjectDir)T4/Manager.ttinclude"	#>
+<#@ include file="$(ProjectDir)T4/DbHelper.ttinclude"	#>
 <#@ output extension=".cs"#>
 <#  
 	var OutputPath1 = Host.ResolveAssemblyReference("$(SolutionDir)");
