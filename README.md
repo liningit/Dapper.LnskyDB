@@ -170,3 +170,7 @@ public class ThreadTool
 }
 ThreadTool.QueueUserWorkItem(ThreadDo);//调用
 ```
+#### 6. 实体类T4自动生成
+在[LnskyDB.Demo\T4](https://github.com/liningit/LnskyDB/tree/master/src/LnskyDB.Demo/T4 "LnskyDB.Demo\T4")中有可以自动生成实体类的T4模版.
+其中DbHelper.ttinclude中的Config是配置数据库的
+Entity.tt是生成实体的T4模版.大家可以根据自己的情况修改
