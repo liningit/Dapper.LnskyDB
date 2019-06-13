@@ -1,6 +1,9 @@
 # LnskyDB
 
-LnskyDB是基于Dapper的linq扩展支持按时间分库分表,也可以自定义分库分表方法
+LnskyDB是基于Dapper的Lambda扩展,支持按时间分库分表,也可以自定义分库分表方法
+
+在此非常感谢SkyChenSky其中lambda表达式的解析参考了他的开源项目
+
 下面是用ProductSaleByDayEntity作为示例,其中StatisticalDate为分库分表字段,如果是对分库分表对象进行数据库操作则必须传入StatisticalDate或者设置DBModel_ShuffledTempDate指定是那个库和表
 
 ------------
@@ -170,3 +173,7 @@ public class ThreadTool
 }
 ThreadTool.QueueUserWorkItem(ThreadDo);//调用
 ```
+#### 6. 实体类T4自动生成
+在[LnskyDB.Demo\T4](https://github.com/liningit/LnskyDB/tree/master/src/LnskyDB.Demo/T4 "LnskyDB.Demo\T4")中有可以自动生成实体类的T4模版.
+其中DbHelper.ttinclude中的Config是配置数据库的
+Entity.tt是生成实体的T4模版.大家可以根据自己的情况修改
