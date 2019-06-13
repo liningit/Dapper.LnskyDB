@@ -1,5 +1,4 @@
-﻿
-using LnskyDB.Model;
+﻿using LnskyDB.Model;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Immutable;
@@ -16,7 +15,7 @@ namespace LnskyDB.Demo.Entity.Purify
 
 
         public override string GetDBModel_TableName() => "Purify_ProductSaleByDay{0}";
-        public override string GetDBModel_DBName() => "LAWPurify{0}";
+        public override string GetDBModel_DBName() => "Lnsky{0}";
 		
 		/// <summary>
         /// 最小分库分表时间
