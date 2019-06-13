@@ -40,7 +40,7 @@ namespace LnskyDB.Demo.Controllers
             var repositoryFactory = RepositoryFactory.Create<ProductSaleByDayEntity>();
             var query = QueryFactory.Create<ProductSaleByDayEntity>(m => m.ShopName.Contains("测试"));
             query.And(m => m.StatisticalDate >= stTime);
-            query.And(m => m.StatisticalDate < endTime.Date.AddDays(1));
+            query.And(m => m.StatisticalDate < endTime.Date.AddDays(1));           
             query.DBModel.DBModel_ShuffledTempDate = new DateTime(2019, 01, 01);//这儿表示查19年1月的库和表
             query.OrderByDescing(m => m.StatisticalDate);
             query.StarSize = 20;

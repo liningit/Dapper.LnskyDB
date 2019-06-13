@@ -90,6 +90,4 @@ namespace LnskyDB.Demo.Entity.<#=tableInfo.TablePre #>
 <#     }
 	manager.Process();
 #>
-<#+
-	 
-#>
+
