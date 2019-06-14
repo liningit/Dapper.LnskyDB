@@ -85,7 +85,35 @@ namespace LnskyDB.Demo.Entity.<#=tableInfo.TablePre #>
 	}
 }
 <# 
-		manager.EndBlock();	 
+		manager.EndBlock();
+		manager.StartBlock("LnskyDB.Demo\\RepositoryInterface\\"+tableInfo.TablePre+"\\I"+tableInfo.TableName+"Repository.cs",false);
+#>
+using LnskyDB;
+using LnskyDB.Demo.Entity.<#=tableInfo.TablePre #>;
+
+namespace LnskyDB.Demo.RepositoryInterface.<#=tableInfo.TablePre #>
+{
+    public interface I<#=tableInfo.TableName #>Repository : IRepository<<#=tableInfo.TableName #>Entity>
+    {
+    }
+}
+<# 
+		manager.EndBlock();
+		manager.StartBlock("LnskyDB.Demo\\Repository\\"+tableInfo.TablePre+"\\"+tableInfo.TableName+"Repository.cs",false);
+#>
+using LnskyDB;
+using LnskyDB.Demo.Entity.<#=tableInfo.TablePre #>;
+using LnskyDB.Demo.RepositoryInterface.<#=tableInfo.TablePre #>;
+
+namespace LnskyDB.Demo.Repository.<#=tableInfo.TablePre #>
+{
+    public class <#=tableInfo.TableName #>Repository : Repository<<#=tableInfo.TableName #>Entity>, I<#=tableInfo.TableName #>Repository
+    {
+    }
+}
+
+<# 
+		manager.EndBlock();		
 #>
 <#     }
 	manager.Process();

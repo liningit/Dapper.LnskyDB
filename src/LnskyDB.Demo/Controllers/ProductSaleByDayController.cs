@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Common.Tool;
 using LnskyDB.Demo.Entity.Purify;
 using LnskyDB.Demo.Repository;
+using LnskyDB.Demo.Repository.Purify;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LnskyDB.Demo.Controllers
@@ -28,7 +29,7 @@ namespace LnskyDB.Demo.Controllers
                 return new ProductSaleByDayRepository();
             }    
         }
-        // GET http://localhost:53277/ProductSaleByDay/Get?sysNo=2d0c6662-9670-4c52-a4e1-02c37681e7e9
+        // GET http://localhost:53277/ProductSaleByDay/Get
 
         [HttpGet]
         public ActionResult<ProductSaleByDayEntity> Get(Guid sysNo)
@@ -47,7 +48,7 @@ namespace LnskyDB.Demo.Controllers
             return entity;
         }
 
-        // GET http://localhost:53277/ProductSaleByDay/GetList?shopName=1&stTime=2019-01-01&endTime=2019-09-05
+        // GET http://localhost:53277/ProductSaleByDay/GetList
         [HttpGet]
         public ActionResult<List<ProductSaleByDayEntity>> GetList()
         {
@@ -67,7 +68,7 @@ namespace LnskyDB.Demo.Controllers
 
             return lst;
         }
-        //GET http://localhost:53277/ProductSaleByDay/GetPaging?shopName=1&stTime=2019-01-01&endTime=2019-03-11&page=2&pageSize=3
+        //GET http://localhost:53277/ProductSaleByDay/GetPaging
         [HttpGet]
         public ActionResult<Paging<ProductSaleByDayEntity>> GetPaging()
         {
@@ -88,7 +89,7 @@ namespace LnskyDB.Demo.Controllers
             return paging;
         }
 
-        // Get http://localhost:53277/ProductSaleByDay/Add?shopName=增加2&StatisticalDate=2019-01-01&dataSource=测试用
+        // Get http://localhost:53277/ProductSaleByDay/Add
         [HttpGet]
         public void Add()
         {
@@ -108,7 +109,7 @@ namespace LnskyDB.Demo.Controllers
             //如果新增主键是自增列会自动赋值自增列值到主键
             repository.Add(addEntity);
         }
-        //http://localhost:53277/ProductSaleByDay/Update?sysNo=650BC09C-2B9C-467B-A457-8B4853CC1F0F&shopName=修改&statisticalDate=2019-01-01&dataSource=修改测试用
+        //http://localhost:53277/ProductSaleByDay/Update
         [HttpGet]
         public bool Update()
         {
@@ -125,7 +126,7 @@ namespace LnskyDB.Demo.Controllers
             //根据主键更新其他字段
             return repository.Update(updateEntity);
         }
-        //http://localhost:53277/ProductSaleByDay/UpdateWhere?shopName=批量修改&shuffledTempDate=2019-02-02&dataSource=更新
+        //http://localhost:53277/ProductSaleByDay/UpdateWhere
         [HttpGet]
         public int UpdateWhere()
         {
@@ -141,7 +142,7 @@ namespace LnskyDB.Demo.Controllers
             //注意如果是更新用的是实体类的DBModel_ShuffledTempDate Query中的无效
             return repository.Update(updateEntity, where);
         }
-        // http://localhost:53277/ProductSaleByDay/Delete?sysNo=5119AC4F-FA2F-470F-8144-0069B45E15CF&statisticalDate=2019-01-01
+        // http://localhost:53277/ProductSaleByDay/Delete
         [HttpGet]
         public bool Delete()
         {
@@ -155,7 +156,7 @@ namespace LnskyDB.Demo.Controllers
             return repository.Delete(deleteEntity);
         }
 
-        //http://localhost:53277/ProductSaleByDay/DleteWhere?shopName=批量修改&shuffledTempDate=2019-02-02&dataSource=新+更
+        //http://localhost:53277/ProductSaleByDay/DleteWhere
         [HttpGet]
         public int DleteWhere(string shopName, DateTime shuffledTempDate, string dataSource)
         {
