@@ -2,7 +2,7 @@
 using System;
 using System.Threading;
 
-namespace Common.Tool
+namespace LnskyDB.Demo
 {
     public class ThreadTool
     {

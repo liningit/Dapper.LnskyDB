@@ -26,11 +26,17 @@ namespace LnskyDB
         public static string LnskyDBConnLstThreadId { get; } = "LnskyDBConnLst";
 
         public static event LnskyDBEventHandler<LnskyDBErrorArgs> Error;
+        /// <summary>
+        /// ThreadStatic表示每个线程都是独立对象
+        /// </summary>
         [ThreadStatic] private static LnskyDBConnLst ThreadLnskyDBConnLst;
-        
+
+        /// <summary>
+        /// 获取当前请求的数据库连接列表
+        /// </summary>
         internal static LnskyDBConnLst GetRequestConnLst()
         {
-            if(ThreadLnskyDBConnLst!=null)
+            if (ThreadLnskyDBConnLst != null)
             {
                 return ThreadLnskyDBConnLst;
             }
@@ -40,12 +46,18 @@ namespace LnskyDB
                 return HttpContext.HttpContext.RequestServices.GetService<LnskyDBConnLst>();
             }
             throw new Exception("没有取到ConnLst");
-            
+
         }
+        /// <summary>
+        /// 当在线程中使用时要在开始调用
+        /// </summary>
         public static void BeginThread()
         {
             ThreadLnskyDBConnLst = new LnskyDBConnLst();
         }
+        /// <summary>
+        /// 关闭当前请求的连接
+        /// </summary>
         public static void CloseConnections()
         {
             var reqModel = GetRequestConnLst();
@@ -127,6 +139,51 @@ namespace LnskyDB
         internal static void DbError(Exception e, string v)
         {
             Error(new LnskyDBErrorArgs { Exception = e, LogInfo = v });
+        }
+        /// <summary>
+        /// 将中文加号等转换成英文
+        /// </summary>
+        public static string ReplaceSearch(string search)
+        {
+            search = search.Replace(" ", " ").Replace("	", " ").Replace("　", " ").Replace("	", " ");
+            search = search.Replace("+", "+").Replace("＋", "+");
+            return search;
+        }
+        /// <summary>
+        /// 检查name是否符合搜索条件
+        /// </summary>
+        public static bool CheckNameSearch(string name, string search)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return false;
+            }
+            if (string.IsNullOrEmpty(search))
+            {
+                return true;
+            }
+            var lstSet = search.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var sinfo in lstSet)
+            {
+                if (string.IsNullOrEmpty(sinfo))
+                {
+                    continue;
+                }
+                bool isOk = true;
+                foreach (var info in sinfo.Split(new string[] { "+" }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    if (!name.Contains(info))
+                    {
+                        isOk = false;
+                    }
+                }
+                if (isOk)
+                {
+                    return true;
+                }
+
+            }
+            return false;
         }
     }
     internal static class DBModelTool

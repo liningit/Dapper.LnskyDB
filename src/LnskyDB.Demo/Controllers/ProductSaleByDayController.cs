@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Common.Tool;
+﻿ 
 using LnskyDB.Demo.Entity.Purify;
-using LnskyDB.Demo.Repository;
 using LnskyDB.Demo.Repository.Purify;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
 
 namespace LnskyDB.Demo.Controllers
 {
