@@ -16,6 +16,9 @@
 ![undefined](images/createWebsite.png "undefined")
 
 ## 配置网站
+1. 打开Nuget管理添加LnskyDB包
+![undefined](images/addNuGet.png "undefined")
+
 1. 打开appsettings.json文件加入代码,注意数据库名称为`Lnsky_Test{0}`
 ```json
 "ConnectionStrings": {
