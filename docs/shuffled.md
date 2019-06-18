@@ -1,35 +1,5 @@
-# LnskyDB
-
-LnskyDB是基于Dapper的Lambda扩展,支持按时间分库分表,也可以自定义分库分表方法.而且可以T4生成实体类免去手写实体类的烦恼.
-
-文档地址: https://liningit.github.io/LnskyDB/
-
-开源地址: https://github.com/liningit/LnskyDB
-
-nuget地址: https://www.nuget.org/packages/LnskyDB/
-
-在此非常感谢SkyChenSky其中lambda表达式的解析参考了他的开源项目
-
-下面是用ProductSaleByDayEntity作为示例,其中StatisticalDate为分库分表字段,如果是对分库分表对象进行数据库操作则必须传入StatisticalDate或者设置DBModel_ShuffledTempDate指定是那个库和表
-
-------------
-#### 1. 使用配置
-在Startup.cs的`ConfigureServices`中添加`services.AddLnskyDB();`在`Configure`中添加`app.UseLnskyDB();`
-#### 2. 仓储的创建
-仓储的创建有两种方式一种是通过`RepositoryFactory.Create<ProductSaleByDayEntity>()`创建`IRepository<ProductSaleByDayEntity>`
-还有一种是创建一个仓储类继承`Repository<ProductSaleByDayEntity>`
-```csharp
-public interface IProductSaleByDayRepository : IRepository<ProductSaleByDayEntity>
-{
-}
-public class ProductSaleByDayRepository : Repository<ProductSaleByDayEntity>
-{
-}
-//调用的地方可以
-IProductSaleByDayRepository repository=new ProductSaleByDayRepository();
-```
-#### 3. 查询
-3.1 根据主键查询
+## 查询
+1. 根据主键查询
 ```csharp
 var repository = RepositoryFactory.Create<ProductSaleByDayEntity>();
 var entity = repository.Get(new ProductSaleByDayEntity
@@ -38,7 +8,7 @@ var entity = repository.Get(new ProductSaleByDayEntity
     SysNo = sysNo
 });
 ```
-3.2 根据where条件查询
+1. 根据where条件查询
 ```csharp
 var stTime = new DateTime(2019, 1, 15);
 var endTime = new DateTime(2019, 2, 11);
@@ -66,7 +36,7 @@ query.StarSize = 20;
 query.Rows = 10;
 var lst= repository.GetList(query);
 ```
-3.3 分页查询
+1. 分页查询
 ```csharp
 var stTime = new DateTime(2019, 1, 15);
 var endTime = new DateTime(2019, 2, 11);
@@ -98,7 +68,8 @@ var paging= repository.GetPaging(query);
 var count = paging.TotalCount;
 var lst = paging.ToList();//或者paging.Items
 ```
-#### 4. 添加
+
+## 添加
 ```csharp
 var addEntity = new ProductSaleByDayEntity()
 {
@@ -116,8 +87,9 @@ var repository = RepositoryFactory.Create<ProductSaleByDayEntity>();
 //如果新增主键是自增列会自动赋值自增列值到主键
 repository.Add(addEntity);
 ```
-#### 5. 更新
-5.1 根据主键更新
+
+## 更新
+1. 根据主键更新
 ```csharp
 var updateEntity = new ProductSaleByDayEntity()
 {
@@ -132,7 +104,7 @@ var repository = RepositoryFactory.Create<ProductSaleByDayEntity>();
 //根据主键更新其他字段
 return repository.Update(updateEntity);
 ```
-5.2 根据where条件更新
+1. 根据where条件更新
 ```csharp
 var updateEntity = new ProductSaleByDayEntity()
 {
@@ -146,8 +118,9 @@ var where = QueryFactory.Create<ProductSaleByDayEntity>(m => m.ShopName == "测�
 //注意如果是更新用的是实体类的DBModel_ShuffledTempDate Query中的无效
 return repository.Update(updateEntity, where);
 ```
-#### 6. 删除
-6.1 根据主键删除
+
+## 删除
+1. 根据主键删除
 ```csharp
 var deleteEntity = new ProductSaleByDayEntity()
 {
@@ -157,7 +130,7 @@ var deleteEntity = new ProductSaleByDayEntity()
 var repository = RepositoryFactory.Create<ProductSaleByDayEntity>();
 return repository.Delete(deleteEntity);
 ```
-6.2 根据where条件删除
+1. 根据where条件删除
 ```csharp
 var repository = RepositoryFactory.Create<ProductSaleByDayEntity>();
 var where = QueryFactory.Create<ProductSaleByDayEntity>();
@@ -170,32 +143,3 @@ where.QueryiSearch(m => m.ShopName, "批量修改");
 //注意如果是更新用的是实体类的DBModel_ShuffledTempDate Query中的无效
 return repository.Delete(where);
 ```
-#### 7. 多线程处理
-对于mvc每次请求都会在请求结束时将数据库连接关闭,如果是新建线程则需要在线程开始调用`DBTool.BeginThread();`
-并且在线程结束为止调用`DBTool.CloseConnections();`关闭连接
-```csharp
-public class ThreadTool
-{
-    public static void QueueUserWorkItem(Action action)
-    {
-        ThreadPool.QueueUserWorkItem(delegate
-        {
-            DBTool.BeginThread();
-            try
-            {
-                action();
-            }
-            finally
-            {
-                DBTool.CloseConnections();
-            }
-        });
-    }
-}
-ThreadTool.QueueUserWorkItem(ThreadDo);//调用
-```
-#### 8. 实体类T4自动生成
-在[LnskyDB.Demo\T4](https://github.com/liningit/LnskyDB/tree/master/src/LnskyDB.Demo/T4 "LnskyDB.Demo\T4")中有可以自动生成实体类的T4模版.
-其中DbHelper.ttinclude中的Config是配置数据库的
-Entity.tt是生成实体的T4模版.大家可以根据自己的情况修改
-我们项目是表的命名规则是 :非分库分表的:模块_表名 分库分表:模块_表名_月份 所以T4也是根据这个规则生成的.大家如果不一样的话可以根据自己的情况修改`DbHelper.ttinclude`文件
