@@ -16,17 +16,17 @@ namespace LnskyDB.Model
         /// 主键
         /// </summary>
         public abstract ImmutableList<string> GetDBModel_PKCols();
+        private static ImmutableList<string> _DBModel_ExcludeColsForUpdate = ImmutableList.Create<string>();
         /// <summary>
         /// 更新时忽略的列
         /// </summary>
-        public abstract ImmutableList<string> GetDBModel_ExcludeColsForUpdate();
+        public virtual ImmutableList<string> GetDBModel_ExcludeColsForUpdate() => _DBModel_ExcludeColsForUpdate;
         /// <summary>
         /// 自增列
         /// </summary>
-        public abstract string GetDBModel_IncrementCol();
+        public virtual string GetDBModel_IncrementCol() => string.Empty;
 
-
-        public void SetIncrementValue(int value)
+        public virtual void SetIncrementValue(int value)
         {
             throw new Exception("该表没有自增列");
         }

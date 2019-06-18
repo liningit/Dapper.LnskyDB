@@ -4,7 +4,7 @@ using System;
 using System.Collections.Immutable;
 namespace LnskyDB.Demo.Entity.Purify
 {
-    public class ProductSaleByDayEntity : BaseDBModel
+    public class ProductSaleByDayNSEntity : BaseDBModel
     {
 		private static ImmutableList<string> _DBModel_PKCols = ImmutableList.Create("SysNo");
         public override ImmutableList<string> GetDBModel_PKCols() => _DBModel_PKCols;
@@ -12,32 +12,8 @@ namespace LnskyDB.Demo.Entity.Purify
         private static ImmutableList<string> _DBModel_ExcludeColsForUpdate = ImmutableList.Create("CreateDate", "CreateUserID");
         public override ImmutableList<string> GetDBModel_ExcludeColsForUpdate() => _DBModel_ExcludeColsForUpdate;
 		
-        public override string GetDBModel_TableName() => "Purify_ProductSaleByDay{0}";
-        public override string GetDBModel_DBName() => "Lnsky{0}";
-		
-		/// <summary>
-        /// 最小分库分表时间
-        /// </summary>
-        public static DateTime MinShuffledTempDate { get; } = new DateTime(2018, 1, 1);
-        /// <summary>
-        /// 获取分库分表信息,如果没有分库分表则可以不重写
-        /// </summary>
-        /// <returns></returns>
-        public override ShuffledModel GetShuffledModel()
-        {
-            if (DBModel_ShuffledTempDate == DateTime.MinValue)
-            {
-                throw new NoShuffledException(GetDBModel_TableName(), "分库分表时间,ShuffledTempDate");
-            }
-            return ShuffledByDbTable(DBModel_ShuffledTempDate);
-        }
-
-        DateTime _DBModel_ShuffledTempDate;
-
-        [JsonIgnore]
-        public DateTime DBModel_ShuffledTempDate { get { return StatisticalDate != DateTime.MinValue ? StatisticalDate : _DBModel_ShuffledTempDate; } set { _DBModel_ShuffledTempDate = value; } }
-
-        public override void SetShuffledData(object obj) { DBModel_ShuffledTempDate = (DateTime)obj; }
+        public override string GetDBModel_TableName() => "Purify_ProductSaleByDayNS{0}";
+        public override string GetDBModel_DBName() => "LnskyNS{0}";
 		
 		#region Model
 		

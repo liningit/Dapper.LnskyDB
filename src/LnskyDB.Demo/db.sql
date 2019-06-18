@@ -1,3 +1,141 @@
+USE LnskyNS_Test
+GO
+
+IF DB_NAME() <> N'LnskyNS_Test' SET NOEXEC ON
+GO
+/****** Object:  Table [dbo].[Purify_ProductSaleByDayNS]    Script Date: 2019/6/18 17:09:29 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Purify_ProductSaleByDayNS](
+	[SysNo] [uniqueidentifier] NOT NULL,
+	[DataSource] [nvarchar](100) NOT NULL,
+	[OutProductID] [nvarchar](100) NOT NULL,
+	[BrandID] [uniqueidentifier] NOT NULL,
+	[CategoryID] [uniqueidentifier] NOT NULL,
+	[ProductID] [uniqueidentifier] NOT NULL,
+	[ProductName] [nvarchar](100) NOT NULL,
+	[ShopID] [uniqueidentifier] NOT NULL,
+	[ShopName] [nvarchar](100) NULL,
+	[StatisticalDate] [date] NOT NULL,
+	[Sales] [decimal](18, 2) NOT NULL,
+	[NumberOfSales] [int] NOT NULL,
+	[AveragePrice] [decimal](18, 2) NOT NULL,
+	[OrderQuantity] [int] NOT NULL,
+	[CreateDate] [datetime] NOT NULL,
+	[CreateUserID] [uniqueidentifier] NOT NULL,
+	[UpdateDate] [datetime] NULL,
+	[UpdateUserID] [uniqueidentifier] NULL,
+	[ImportGroupId] [uniqueidentifier] NOT NULL,
+	[IsExclude] [bit] NOT NULL,
+ CONSTRAINT [PK_Purify_ProductSaleByDayNS] PRIMARY KEY CLUSTERED 
+(
+	[SysNo] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[Purify_ProductSaleByDayNS] ADD  CONSTRAINT [DF_Purify_ProductSaleByDayNS_SysNo]  DEFAULT (newid()) FOR [SysNo]
+GO
+
+ALTER TABLE [dbo].[Purify_ProductSaleByDayNS] ADD  CONSTRAINT [DF_Purify_ProductSaleByDayNS_OutProductID]  DEFAULT ('') FOR [OutProductID]
+GO
+
+ALTER TABLE [dbo].[Purify_ProductSaleByDayNS] ADD  CONSTRAINT [DF_Purify_ProductSaleByDayNS_BrandID]  DEFAULT (CONVERT([binary],(0))) FOR [BrandID]
+GO
+
+ALTER TABLE [dbo].[Purify_ProductSaleByDayNS] ADD  CONSTRAINT [DF_Purify_ProductSaleByDayNS_CategoryID]  DEFAULT (CONVERT([binary],(0))) FOR [CategoryID]
+GO
+
+ALTER TABLE [dbo].[Purify_ProductSaleByDayNS] ADD  CONSTRAINT [DF_Purify_ProductSaleByDayNS_ProductID]  DEFAULT (CONVERT([binary],(0))) FOR [ProductID]
+GO
+
+ALTER TABLE [dbo].[Purify_ProductSaleByDayNS] ADD  CONSTRAINT [DF_Purify_ProductSaleByDayNS_ShopID]  DEFAULT (CONVERT([binary],(0))) FOR [ShopID]
+GO
+
+ALTER TABLE [dbo].[Purify_ProductSaleByDayNS] ADD  CONSTRAINT [DF_Purify_ProductSaleByDayNS_ShopName]  DEFAULT ('') FOR [ShopName]
+GO
+
+ALTER TABLE [dbo].[Purify_ProductSaleByDayNS] ADD  CONSTRAINT [DF_Purify_ProductSaleByDayNS_Sales]  DEFAULT ((0)) FOR [Sales]
+GO
+
+ALTER TABLE [dbo].[Purify_ProductSaleByDayNS] ADD  CONSTRAINT [DF_Purify_ProductSaleByDayNS_NumberOfSales]  DEFAULT ((0)) FOR [NumberOfSales]
+GO
+
+ALTER TABLE [dbo].[Purify_ProductSaleByDayNS] ADD  CONSTRAINT [DF_Purify_ProductSaleByDayNS_AveragePrice]  DEFAULT ((0)) FOR [AveragePrice]
+GO
+
+ALTER TABLE [dbo].[Purify_ProductSaleByDayNS] ADD  CONSTRAINT [DF_Purify_ProductSaleByDayNS_OrderQuantity]  DEFAULT ((0)) FOR [OrderQuantity]
+GO
+
+ALTER TABLE [dbo].[Purify_ProductSaleByDayNS] ADD  CONSTRAINT [DF_Purify_ProductSaleByDayNS_CreateDate]  DEFAULT (getdate()) FOR [CreateDate]
+GO
+
+ALTER TABLE [dbo].[Purify_ProductSaleByDayNS] ADD  CONSTRAINT [DF_Purify_ProductSaleByDayNS_CreateUserID]  DEFAULT (CONVERT([binary],(0))) FOR [CreateUserID]
+GO
+
+ALTER TABLE [dbo].[Purify_ProductSaleByDayNS] ADD  CONSTRAINT [DF_Purify_ProductSaleByDayNS_IsExclude]  DEFAULT ((0)) FOR [IsExclude]
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'数据来源' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Purify_ProductSaleByDayNS', @level2type=N'COLUMN',@level2name=N'DataSource'
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'外部商品ID' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Purify_ProductSaleByDayNS', @level2type=N'COLUMN',@level2name=N'OutProductID'
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'分类id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Purify_ProductSaleByDayNS', @level2type=N'COLUMN',@level2name=N'CategoryID'
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'商品id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Purify_ProductSaleByDayNS', @level2type=N'COLUMN',@level2name=N'ProductID'
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'商品名称' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Purify_ProductSaleByDayNS', @level2type=N'COLUMN',@level2name=N'ProductName'
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'店铺ID' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Purify_ProductSaleByDayNS', @level2type=N'COLUMN',@level2name=N'ShopID'
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'店铺名称' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Purify_ProductSaleByDayNS', @level2type=N'COLUMN',@level2name=N'ShopName'
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'统计日期' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Purify_ProductSaleByDayNS', @level2type=N'COLUMN',@level2name=N'StatisticalDate'
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'销售额' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Purify_ProductSaleByDayNS', @level2type=N'COLUMN',@level2name=N'Sales'
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'销量' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Purify_ProductSaleByDayNS', @level2type=N'COLUMN',@level2name=N'NumberOfSales'
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'商品均价' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Purify_ProductSaleByDayNS', @level2type=N'COLUMN',@level2name=N'AveragePrice'
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'订单量' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Purify_ProductSaleByDayNS', @level2type=N'COLUMN',@level2name=N'OrderQuantity'
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'创建时间' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Purify_ProductSaleByDayNS', @level2type=N'COLUMN',@level2name=N'CreateDate'
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'创建人' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Purify_ProductSaleByDayNS', @level2type=N'COLUMN',@level2name=N'CreateUserID'
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'更新时间' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Purify_ProductSaleByDayNS', @level2type=N'COLUMN',@level2name=N'UpdateDate'
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'更新人' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Purify_ProductSaleByDayNS', @level2type=N'COLUMN',@level2name=N'UpdateUserID'
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'导入组' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Purify_ProductSaleByDayNS', @level2type=N'COLUMN',@level2name=N'ImportGroupId'
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'黑名单' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Purify_ProductSaleByDayNS', @level2type=N'COLUMN',@level2name=N'IsExclude'
+GO
+
+
+
 USE [Lnsky_Test_19]
 GO
 

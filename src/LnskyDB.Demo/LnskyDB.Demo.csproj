@@ -33,9 +33,4 @@
     </Compile>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="RepositoryInterface\" />
-    <Folder Include="Repository\" />
-  </ItemGroup>
-
 </Project>
