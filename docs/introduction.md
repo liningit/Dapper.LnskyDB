@@ -21,6 +21,10 @@ nuget地址: https://www.nuget.org/packages/LnskyDB/
 - **使用门槛低,快速上手**<br>
   使用非常简单,可以快速上手
 
+## 注意问题
+本框架只支持单表的Lambda表达式查询,如果多表需要手写sql,框架支持根据sql查询修改等.
+另外不太建议连表查询,推荐在逻辑层处理
+
 ## 开源协议
 [MIT license.](/LICENSE)
 
