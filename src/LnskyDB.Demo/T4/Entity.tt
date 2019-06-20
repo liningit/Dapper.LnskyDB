@@ -35,9 +35,7 @@ namespace LnskyDB.Demo.Entity.<#=tableInfo.TablePre #>
     {
 		private static ImmutableList<string> _DBModel_PKCols = ImmutableList.Create("<#=string.Join("\",\"", tableInfo.PKCols)#>");
         public override ImmutableList<string> GetDBModel_PKCols() => _DBModel_PKCols;
-
-        private static ImmutableList<string> _DBModel_ExcludeColsForUpdate = ImmutableList.Create("CreateDate", "CreateUserID");
-        public override ImmutableList<string> GetDBModel_ExcludeColsForUpdate() => _DBModel_ExcludeColsForUpdate;
+ 
 		<# if(!string.IsNullOrEmpty(tableInfo.IncrementCol))
 		{#>public override string GetDBModel_IncrementCol() =>  <#="\"" + tableInfo.IncrementCol + "\"" #>;
 		public override void SetIncrementValue(int value)

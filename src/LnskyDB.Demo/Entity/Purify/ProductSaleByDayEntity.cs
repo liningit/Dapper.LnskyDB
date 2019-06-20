@@ -8,9 +8,7 @@ namespace LnskyDB.Demo.Entity.Purify
     {
 		private static ImmutableList<string> _DBModel_PKCols = ImmutableList.Create("SysNo");
         public override ImmutableList<string> GetDBModel_PKCols() => _DBModel_PKCols;
-
-        private static ImmutableList<string> _DBModel_ExcludeColsForUpdate = ImmutableList.Create("CreateDate", "CreateUserID");
-        public override ImmutableList<string> GetDBModel_ExcludeColsForUpdate() => _DBModel_ExcludeColsForUpdate;
+ 
 		
         public override string GetDBModel_TableName() => "Purify_ProductSaleByDay{0}";
         public override string GetDBModel_DBName() => "Lnsky{0}";
