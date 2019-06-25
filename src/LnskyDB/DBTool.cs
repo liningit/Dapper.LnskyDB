@@ -138,7 +138,10 @@ namespace LnskyDB
         }
         internal static void DbError(Exception e, string v)
         {
-            Error(new LnskyDBErrorArgs { Exception = e, LogInfo = v });
+            if (Error != null)
+            {
+                Error(new LnskyDBErrorArgs { Exception = e, LogInfo = v });
+            }
         }
         /// <summary>
         /// 将中文加号等转换成英文

@@ -118,6 +118,19 @@ namespace LnskyDB.Expressions
                 Visit(exp);
                 return;
             }
+            switch (exp.NodeType)
+            {
+
+                case ExpressionType.Add:
+                case ExpressionType.AddChecked:
+                case ExpressionType.Divide:
+                case ExpressionType.Multiply:
+                case ExpressionType.MultiplyChecked:
+                case ExpressionType.Subtract:
+                case ExpressionType.SubtractChecked:
+                    Visit(exp);
+                    return;
+            }
             SetParam(GetExpressionValue(exp));
         }
 

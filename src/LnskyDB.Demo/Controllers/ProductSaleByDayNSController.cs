@@ -1,4 +1,4 @@
-﻿ 
+﻿
 using LnskyDB.Demo.Entity.Purify;
 using LnskyDB.Demo.Repository.Purify;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +24,7 @@ namespace LnskyDB.Demo.Controllers
             {
                 //也可以继承实例化
                 return new ProductSaleByDayNSRepository();
-            }    
+            }
         }
         // GET http://localhost:53277/ProductSaleByDayNS/Get
 
@@ -34,7 +34,7 @@ namespace LnskyDB.Demo.Controllers
 
             var repository = GetRepository();
             var entity = repository.Get(new ProductSaleByDayNSEntity
-            {               
+            {
                 SysNo = sysNo
             });
             if (entity == null)
@@ -52,10 +52,9 @@ namespace LnskyDB.Demo.Controllers
             var stTime = new DateTime(2019, 1, 15);
             var endTime = new DateTime(2019, 2, 11);
             var repository = GetRepository();
-            var query = QueryFactory.Create<ProductSaleByDayNSEntity>(m => m.ShopName.Contains("测试"));
-            query.And(m => m.StatisticalDate >= stTime);
-            query.And(m => m.StatisticalDate < endTime.Date.AddDays(1));
- 
+            var query = QueryFactory.Create<ProductSaleByDayNSEntity>(m => m.Sales != m.AveragePrice && (m.Sales + m.AveragePrice) / m.Sales >= 1);
+
+
             query.OrderByDescing(m => m.StatisticalDate);
             query.StarSize = 20;
             query.Rows = 10;
@@ -126,11 +125,11 @@ namespace LnskyDB.Demo.Controllers
             {
                 DataSource = "测试来源修改",
                 ShopName = "店铺修改Where",
-               
+
             };
             var repository = GetRepository();
             var where = QueryFactory.Create<ProductSaleByDayNSEntity>(m => m.DataSource == "新增测试来源" && m.StatisticalDate > new DateTime(2019, 01, 03));//where是更新条件
-           
+
             return repository.Update(updateEntity, where);
         }
         // http://localhost:53277/ProductSaleByDayNS/Delete
@@ -140,7 +139,7 @@ namespace LnskyDB.Demo.Controllers
 
             var deleteEntity = new ProductSaleByDayNSEntity()
             {
-                SysNo = Guid.Parse("650BC09C-2B9C-467B-A457-8B4853CC1F0F")               
+                SysNo = Guid.Parse("650BC09C-2B9C-467B-A457-8B4853CC1F0F")
             };
             var repository = GetRepository();
             return repository.Delete(deleteEntity);
@@ -156,7 +155,7 @@ namespace LnskyDB.Demo.Controllers
             //QueryiSearch方法表示搜索里面空格表示或+表示且
             //如 导入+手工 自动+生成 表示字段必须同时拥有导入和手工或者自动和生成
             //生成sql是 and ((DataSource like '%导入%' and DataSource like '%手工%') or DataSource like '%自动%' and DataSource like '%生成%')            
-            where.QueryiSearch(m => m.DataSource, "新 修改"); 
+            where.QueryiSearch(m => m.DataSource, "新 修改");
             //注意如果是更新用的是实体类的DBModel_ShuffledTempDate Query中的无效
             return repository.Delete(where);
         }
@@ -180,7 +179,7 @@ namespace LnskyDB.Demo.Controllers
 
                 var query = QueryFactory.Create<ProductSaleByDayNSEntity>();
                 query.And(m => m.StatisticalDate >= stTime);
-                query.And(m => m.StatisticalDate < stTime.AddDays(3));                
+                query.And(m => m.StatisticalDate < stTime.AddDays(3));
                 //分页查询必须有排序字段
                 query.OrderByDescing(m => m.StatisticalDate);
                 //分库的传入stTime,endTime会自动根据时间查询符合条件的库和表
