@@ -44,6 +44,9 @@ public DateTime DBModel_ShuffledTempDate { get { return StatisticalDate != DateT
 
 public override void SetShuffledData(object obj) { DBModel_ShuffledTempDate = (DateTime)obj; }
 ```
+## 错误日志
+DBTool.Error事件,当执行sql发生异常会触发DBTool.Error事件
+
 ## T4模版生成
 项目'LnskyDB.Demo'中的T4目录下有T4自动生成实体类的代码.大家可以根据自己的实际情况进行修改配置
 'DbHelper.ttinclude'中的'Config.DbConfigs'是用来编写生成配置的

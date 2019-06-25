@@ -52,7 +52,7 @@ namespace LnskyDB.Demo.Controllers
             var stTime = new DateTime(2019, 1, 15);
             var endTime = new DateTime(2019, 2, 11);
             var repository = GetRepository();
-            var query = QueryFactory.Create<ProductSaleByDayNSEntity>(m => m.Sales != m.AveragePrice && (m.Sales + m.AveragePrice) / m.Sales >= 1);
+            var query = QueryFactory.Create<ProductSaleByDayNSEntity>(m => m.Sales != 0 && (m.Sales + m.AveragePrice) / m.Sales >= 1);
 
 
             query.OrderByDescing(m => m.StatisticalDate);
