@@ -4,6 +4,7 @@ using System.Linq;
 using LnskyDB;
 using LnskyDB.Demo.Entity.Purify;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Lnsky.Test.Controllers
 {
@@ -11,6 +12,7 @@ namespace Lnsky.Test.Controllers
     [ApiController]
     public class InitController : ControllerBase
     {
+
         public static object lockObj = new object();
         static List<string> lstDataSource = new List<string> { "测试来源1", "测试来源2", "自动生成" };
         static Dictionary<Guid, string> dicShop = new Dictionary<Guid, string> {
@@ -20,7 +22,8 @@ namespace Lnsky.Test.Controllers
         static Dictionary<Guid, string> dicProduct = new Dictionary<Guid, string>();
         static InitController()
         {
-            InitDic(dicProduct, "测试商品", 10);
+            
+    InitDic(dicProduct, "测试商品", 10);
         }
         private static void InitDic(Dictionary<Guid, string> dic, string namePre, int count)
         {

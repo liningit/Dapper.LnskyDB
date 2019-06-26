@@ -70,11 +70,10 @@ namespace LnskyDB.Demo.Controllers
             var stTime = new DateTime(2019, 1, 15);
             var endTime = new DateTime(2019, 2, 11);
             var repository = GetRepository();
-            var query = QueryFactory.Create<ProductSaleByDayNSEntity>(m => m.ShopName.Contains("测试"));
-            query.And(m => m.StatisticalDate >= stTime);
-            query.And(m => m.StatisticalDate < endTime.Date.AddDays(1));
+            var query = QueryFactory.Create<ProductSaleByDayNSEntity>(m => DBFunction.Function<DateTime>("ISNULL", m.UpdateDate, DateTime.Now) > new DateTime(2019, 6, 26));
+
             query.OrderByDescing(m => m.StatisticalDate);
-            query.StarSize = 20;
+            query.StarSize = 0;
             query.Rows = 10;
             var paging = repository.GetPaging(query);
             var count = paging.TotalCount;
