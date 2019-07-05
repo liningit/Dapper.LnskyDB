@@ -15,8 +15,10 @@ namespace LnskyDB
         T Get(T obj);
         List<T> GetList(IQuery<T> query);
         List<T> GetList(IQuery<T> query, DateTime stTime, DateTime endime);
-        Paging<T> GetPaging(IQuery<T> query, DateTime stTime, DateTime endime);
         List<R> GetList<R>(IQuery<T> query);
+        List<R> GetList<R>(ISelectResult<R> query);
+        Paging<T> GetPaging(IQuery<T> query, DateTime stTime, DateTime endime);
+
         Paging<T> GetPaging(IQuery<T> query);
         bool Update(T obj);
         List<T> GetList(string sql, object par);

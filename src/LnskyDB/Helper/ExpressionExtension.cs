@@ -15,6 +15,13 @@ namespace LnskyDB.Helper
         /// </summary>
         private static readonly Dictionary<ExpressionType, string> NodeTypeDic = new Dictionary<ExpressionType, string>
         {
+            {ExpressionType.Add," + "},
+            {ExpressionType.AddChecked," + "},
+            {ExpressionType.Divide," / "},
+            {ExpressionType.Multiply," * "},
+            {ExpressionType.MultiplyChecked," * "},
+            {ExpressionType.Subtract," - "},
+            {ExpressionType.SubtractChecked," - "},
             {ExpressionType.AndAlso," AND "},
             {ExpressionType.OrElse," OR "},
             {ExpressionType.Equal," = "},
@@ -25,7 +32,7 @@ namespace LnskyDB.Helper
             {ExpressionType.GreaterThanOrEqual," >= "}
         };
         #endregion
-
+       
         #region 获取表达式类型转换结果
         /// <summary>
         /// 获取表达式类型转换结果

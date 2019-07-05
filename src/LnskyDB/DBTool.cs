@@ -138,7 +138,10 @@ namespace LnskyDB
         }
         internal static void DbError(Exception e, string v)
         {
-            Error(new LnskyDBErrorArgs { Exception = e, LogInfo = v });
+            if (Error != null)
+            {
+                Error(new LnskyDBErrorArgs { Exception = e, LogInfo = v });
+            }
         }
         /// <summary>
         /// 将中文加号等转换成英文
@@ -188,7 +191,6 @@ namespace LnskyDB
     }
     internal static class DBModelTool
     {
-        public static ProviderOption ProviderOption = new ProviderOption('[', ']', '@');
         internal static List<T> GetAll<T>(this DbConnection conn, int? commandTimeout = null) where T : BaseDBModel, new()
         {
             T obj = new T();
@@ -401,10 +403,10 @@ namespace LnskyDB
         }
 
 
-        private static DynamicParameters SetWhereSql<T>(IQuery<T> query, StringBuilder sql, bool isCount = false) where T : BaseDBModel
+        internal static DynamicParameters SetWhereSql<T>(IQuery<T> query, StringBuilder sql, bool isOnlyWhere = false, string tableAlias = "") where T : BaseDBModel
         {
             var dynamicParameters = new DynamicParameters();
-            var whereSql = GetSql(query.DBModel.GetDBModel_ChangeList(), "AND");
+            var whereSql = GetSql(query.DBModel.GetDBModel_ChangeList(), "AND", tableAlias);
             if (!string.IsNullOrEmpty(whereSql))
             {
                 sql.Append(" AND ");
@@ -412,9 +414,9 @@ namespace LnskyDB
                 dynamicParameters.AddDynamicParams(query.DBModel);
 
             }
-            var where = new WhereExpression(query.WhereExpression, "", ProviderOption);
+            var where = new WhereExpression(query.WhereExpression, "", tableAlias);
             sql.Append(where.SqlCmd);
-            if (!isCount)
+            if (!isOnlyWhere)
             {
                 sql.Append(GetOrderBy(query.OrderbyList));
                 sql.Append(GetLimit(query));
@@ -445,7 +447,7 @@ namespace LnskyDB
             var orderByList = orderByLst.Select(a =>
             {
                 var columnName = ((MemberExpression)a.Field.Body).Member.GetColumnAttributeName();
-                return ProviderOption.CombineFieldName(columnName) + (a.OrderBy == EOrderBy.Asc ? " ASC " : " DESC ");
+                return ProviderOption.Option.CombineFieldName(columnName) + (a.OrderBy == EOrderBy.Asc ? " ASC " : " DESC ");
             }).ToList();
 
             if (!orderByList.Any())
@@ -453,17 +455,20 @@ namespace LnskyDB
             return "ORDER BY " + string.Join(",", orderByList);
         }
 
-        private static string GetSql(ICollection<string> keys, string addPre)
+        private static string GetSql(ICollection<string> keys, string addPre, string tableAlias = "")
         {
+            if (!string.IsNullOrEmpty(tableAlias))
+            {
+                tableAlias += ".";
+            }
             StringBuilder sql = new StringBuilder();
-
             foreach (var k in keys)
             {
                 if (sql.Length > 0)
                 {
                     sql.Append($" {addPre} ");
                 }
-                sql.Append($"[{k}]=@{k}");
+                sql.Append($"{tableAlias}[{k}]=@{k}");
             }
             return sql.ToString();
         }

@@ -124,6 +124,10 @@ namespace LnskyDB
             return GetConn(obj).Query<R>(sql: sql, param: par, commandTimeout: CommandTimeout).AsList();
         }
 
+        public List<R> GetList<R>(ISelectResult<R> query)
+        {
+            return GetConn(null).Query<R>(sql: query.SqlCmd, param: query.Param, commandTimeout: CommandTimeout).AsList();
+        }
         public T Get(T obj, string sql, object par)
         {
             return GetConn(obj).QueryFirstOrDefault<T>(sql: sql, param: par, commandTimeout: CommandTimeout);
@@ -196,5 +200,7 @@ namespace LnskyDB
             return res.List;
 
         }
+
+
     }
 }

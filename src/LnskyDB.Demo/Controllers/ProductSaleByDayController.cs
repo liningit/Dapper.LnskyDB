@@ -1,9 +1,12 @@
-﻿ 
+﻿
 using LnskyDB.Demo.Entity.Purify;
 using LnskyDB.Demo.Repository.Purify;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Collections.Generic;
+using LnskyDB.Model;
 
 namespace LnskyDB.Demo.Controllers
 {
@@ -24,7 +27,7 @@ namespace LnskyDB.Demo.Controllers
             {
                 //也可以继承实例化
                 return new ProductSaleByDayRepository();
-            }    
+            }
         }
         // GET http://localhost:53277/ProductSaleByDay/Get
 
@@ -49,21 +52,16 @@ namespace LnskyDB.Demo.Controllers
         [HttpGet]
         public ActionResult<List<ProductSaleByDayEntity>> GetList()
         {
+            var s = QueryFactory.Create<ProductSaleByDayNSEntity>();
 
-            var stTime = new DateTime(2019, 1, 15);
-            var endTime = new DateTime(2019, 2, 11);
-            var repository = GetRepository();
-            var query = QueryFactory.Create<ProductSaleByDayEntity>(m => m.ShopName.Contains("测试"));
-            query.And(m => m.StatisticalDate >= stTime);
-            query.And(m => m.StatisticalDate < endTime.Date.AddDays(1));
-            query.DBModel.DBModel_ShuffledTempDate = new DateTime(2019, 01, 01);//这儿表示查19年1月的库和表
-            query.OrderByDescing(m => m.StatisticalDate);
-            query.StarSize = 20;
-            query.Rows = 10;
-            //分库的传入stTime,endTime会自动根据时间查询符合条件的库和表
-            var lst = repository.GetList(query);
+            var temp = s.InnerJoin(QueryFactory.Create<ProductSaleByDayNSEntity>(),
+              m => new { OS = m.SysNo }, m => new { OS = m.SysNo },
+              (x, y) => new { y.SysNo, NS = y, x });
+            var r = temp.Select(m => DBFunction.Function<int>("max", m.NS.Sales));
+            var repository = new ProductSaleByDayNSRepository(); ;
+            var tr = repository.GetList(r);
+            return null;
 
-            return lst;
         }
         //GET http://localhost:53277/ProductSaleByDay/GetPaging
         [HttpGet]

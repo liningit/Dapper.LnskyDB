@@ -1,77 +1,74 @@
-﻿using LnskyDB.Helper;
-using Dapper;
+﻿using Dapper;
+using LnskyDB.Helper;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 
 namespace LnskyDB.Expressions
 {
-    internal sealed class WhereExpression : ExpressionVisitor
+    internal sealed class JoinExpression : ExpressionVisitor
     {
-        #region sql指令
-
-        private readonly StringBuilder _sqlCmd;
-
-        /// <summary>
-        /// sql指令
-        /// </summary>
-        public string SqlCmd => _sqlCmd.Length > 0 ? $" AND {_sqlCmd} " : "";
-
         public DynamicParameters Param { get; }
 
         private string _tempFieldName;
-
         private string TempFieldName
         {
-            get => _prefix + _tempFieldName + Param.ParameterNames.Count();
+            get => _tempFieldName + Param.ParameterNames.Count();
         }
 
         private string ParamName => _parameterPrefix + TempFieldName;
 
-        private readonly string _prefix;
+
 
         private readonly char _parameterPrefix;
 
         private readonly char _closeQuote;
 
         private readonly char _openQuote;
-        private readonly string _tableAlias;
 
-        #endregion
 
-        #region 执行解析
+        string TableName { get; set; }
+        public Dictionary<string, string> JoinDic { get; set; } = new Dictionary<string, string>();
+        private readonly StringBuilder _sqlCmd;
 
-        /// <inheritdoc />
-        /// <summary>
-        /// 执行解析
-        /// </summary>
-        /// <param name="expression"></param>
-        /// <param name="prefix">字段前缀</param>
-        /// <param name="providerOption"></param>
-        /// <returns></returns>
-        public WhereExpression(LambdaExpression expression, string prefix, string tableAlias)
+        public JoinExpression(LambdaExpression expression, string tableName)
         {
-            _tempFieldName = "P_" + tableAlias + GetHashCode() + "_";
-            _sqlCmd = new StringBuilder(100);
-            Param = new DynamicParameters();
-
-            _prefix = prefix;
             _parameterPrefix = ProviderOption.Option.ParameterPrefix;
             _openQuote = ProviderOption.Option.OpenQuote;
             _closeQuote = ProviderOption.Option.CloseQuote;
-            if (!string.IsNullOrEmpty(tableAlias))
-            {
-                _tableAlias = tableAlias + ".";
-            }
+            _tempFieldName = "P_" + GetHashCode() + "_";
+            _sqlCmd = new StringBuilder(100);
+            Param = new DynamicParameters();
+
+            TableName = tableName;
             var exp = TrimExpression.Trim(expression);
+
             Visit(exp);
+            if (_sqlCmd.Length > 0)
+            {
+                JoinDic.Add("", _sqlCmd.ToString());
+            }
         }
-        #endregion
+
 
         #region 访问成员表达式
-
+        public override Expression Visit(Expression node)
+        {
+            return base.Visit(node);
+        }
+        protected override Expression VisitNew(NewExpression node)
+        {
+            for (int i = 0; i < node.Arguments.Count; i++)
+            {
+                Visit(node.Arguments[i]);
+                JoinDic.Add(node.Members[i].Name, _sqlCmd.ToString());
+                _sqlCmd.Clear();
+            }
+            return node;
+        }
         /// <inheritdoc />
         /// <summary>
         /// 访问成员表达式
@@ -80,7 +77,7 @@ namespace LnskyDB.Expressions
         /// <returns></returns>
         protected override System.Linq.Expressions.Expression VisitMember(MemberExpression node)
         {
-            _sqlCmd.Append(_tableAlias + _openQuote + node.Member.GetColumnAttributeName() + _closeQuote);
+            _sqlCmd.Append(TableName + "." + _openQuote + node.Member.GetColumnAttributeName() + _closeQuote);
             return node;
         }
 
@@ -343,6 +340,6 @@ namespace LnskyDB.Expressions
             }
             return result;
         }
-    }
 
+    }
 }
