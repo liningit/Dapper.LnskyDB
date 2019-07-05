@@ -118,6 +118,39 @@ namespace LnskyDB.Expressions
                 Visit(exp);
                 return;
             }
+            switch (exp.NodeType)
+            {
+
+                case ExpressionType.Add:
+                case ExpressionType.AddChecked:
+                case ExpressionType.Divide:
+                case ExpressionType.Multiply:
+                case ExpressionType.MultiplyChecked:
+                case ExpressionType.Subtract:
+                case ExpressionType.SubtractChecked:
+                    Visit(exp);
+                    return;
+                case ExpressionType.Call:
+                    var f = exp as MethodCallExpression;
+                    if (f.Method.DeclaringType == typeof(DBFunction))
+                    {
+                        _sqlCmd.Append(" " + f.Arguments[0].ToConvertAndGetValue() + "(");
+                        var p = f.Arguments[1] as NewArrayExpression;
+                        for (int i = 0; i < p.Expressions.Count; i++)
+                        {
+                            Visit(p.Expressions[i]);
+                            if (i != p.Expressions.Count - 1)
+                            {
+                                _sqlCmd.Append(",");
+                            }
+                        }
+                        _sqlCmd.Append(")");
+                        return;
+                    }
+                    break;
+
+            }
+
             SetParam(GetExpressionValue(exp));
         }
 

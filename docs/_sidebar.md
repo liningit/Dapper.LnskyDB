@@ -5,3 +5,4 @@
 * 增删改查操作
   * [不分库分表](/noshuffled)
   * [分库分表](/shuffled)
+  * [高级操作](/advanced)

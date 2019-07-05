@@ -14,8 +14,7 @@ var entity = repository.Get(new ProductSaleByDayNSEntity
 var stTime = new DateTime(2019, 1, 15);
 var endTime = new DateTime(2019, 2, 11);
 var repository = RepositoryFactory.Create<ProductSaleByDayNSEntity>();
-var query = QueryFactory.Create<ProductSaleByDayNSEntity>(m => m.ShopName.Contains("测试"));
-query.And(m => m.StatisticalDate >= stTime && m.StatisticalDate < endTime.Date.AddDays(1));
+var query = QueryFactory.Create<ProductSaleByDayNSEntity>(m => m.Sales != 0 && (m.Sales + m.AveragePrice) / m.Sales >= 1);
 query.OrderByDescing(m => m.StatisticalDate);
 query.StarSize = 20; //可以设置查询行数及开始行数
 query.Rows = 10;
