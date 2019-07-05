@@ -55,9 +55,9 @@ namespace LnskyDB.Demo.Controllers
             var s = QueryFactory.Create<ProductSaleByDayNSEntity>();
 
             var temp = s.InnerJoin(QueryFactory.Create<ProductSaleByDayNSEntity>(),
-              m => new { OS = m.SysNo }, m => new { OS = m.SysNo },
-              (x, y) => new { y.SysNo, NS = y, x });
-            var r = temp.Select(m => DBFunction.Function<int>("max", m.NS.Sales));
+              m => new { OS = m.ShopName + m.OutProductID + "1" }, m => new { OS = m.ShopName + m.OutProductID + "1" },
+              (x, y) => new { SysNo = y.Sales + x.NumberOfSales, t = y.ShopName + "," + x.ShopName, NS = y, x });
+            var r = temp.Select(m => DBFunction.Function<int>("max", m.SysNo + 1));
             var repository = new ProductSaleByDayNSRepository(); ;
             var tr = repository.GetList(r);
             return null;

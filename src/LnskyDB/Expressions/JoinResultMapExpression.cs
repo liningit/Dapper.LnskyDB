@@ -8,48 +8,26 @@ using System.Text;
 
 namespace LnskyDB.Helper
 {
-    internal class JoinResultMapExpression : ExpressionVisitor
+    internal class JoinResultMapExpression : BaseExpressionVisitor
     {
-        private readonly char _parameterPrefix;
-
-        private readonly char _closeQuote;
-
-        private readonly char _openQuote;
-
-
-
-        string TableName { get; set; }
-        private readonly StringBuilder _sqlCmd = new StringBuilder();
-        private readonly StringBuilder _name = new StringBuilder();
-
-
         public Dictionary<string, string> MapList = new Dictionary<string, string>();
-        Dictionary<string, string> _oldMap = new Dictionary<string, string>();
+        Dictionary<string, string> _map = new Dictionary<string, string>();
 
 
-        public JoinResultMapExpression(LambdaExpression expression, Dictionary<string, string> left, string right)
+        public JoinResultMapExpression(LambdaExpression expression, Dictionary<string, string> left, string right, DynamicParameters para) : base(para)
         {
-            _parameterPrefix = ProviderOption.Option.ParameterPrefix;
-            _openQuote = ProviderOption.Option.OpenQuote;
-            _closeQuote = ProviderOption.Option.CloseQuote;
+            _tempFieldName = "PJR_" + GetHashCode() + "_";
             foreach (var v in left)
             {
                 var key = string.IsNullOrEmpty(v.Key) ? expression.Parameters[0].Name : (expression.Parameters[0].Name + "." + v.Key);
-                _oldMap.Add(key, v.Value);
+                _map.Add(key, v.Value);
             }
-            _oldMap.Add(expression.Parameters[1].Name, right);
+            _map.Add(expression.Parameters[1].Name, right);
 
-            Visit(expression);
-            var trimLength = expression.Parameters[0].Name.Length + expression.Parameters[1].Name.Length + 1;
-            _name.Remove(_name.Length - trimLength, trimLength);
-            if (_sqlCmd.Length > 0 || _name.Length > 0)
+            Visit(expression.Body);
+
+            if (_sqlCmd.Length > 0)
             {
-                _name.Remove(_name.Length - 1, 1);
-                if (_sqlCmd.Length > 0)
-                {
-                    _sqlCmd.Insert(0, ".");
-                }
-                _sqlCmd.Insert(0, _oldMap[_name.ToString()]);
                 MapList.Add("", _sqlCmd.ToString());
             }
         }
@@ -60,14 +38,9 @@ namespace LnskyDB.Helper
             for (int i = 0; i < node.Arguments.Count; i++)
             {
                 Visit(node.Arguments[i]);
-                if (_sqlCmd.Length > 0)
-                {
-                    _sqlCmd.Insert(0, ".");
-                }
-                _sqlCmd.Insert(0, _oldMap[_name.ToString()]);
                 MapList.Add(node.Members[i].Name, _sqlCmd.ToString());
                 _sqlCmd.Clear();
-                _name.Clear();
+
             }
             return node;
         }
@@ -77,11 +50,7 @@ namespace LnskyDB.Helper
         }
         protected override Expression VisitParameter(ParameterExpression node)
         {
-            if (_name.Length > 0)
-            {
-                _name.Append(".");
-            }
-            _name.Append(node.Name);
+            _sqlCmd.Append(_map[node.Name]);
             return node;
 
         }
@@ -93,9 +62,14 @@ namespace LnskyDB.Helper
         /// <returns></returns>
         protected override System.Linq.Expressions.Expression VisitMember(MemberExpression node)
         {
-            Visit(node.Expression);
-
-            _sqlCmd.Append(_openQuote + node.Member.GetColumnAttributeName() + _closeQuote);
+            var name = node.ToString();
+            if (!_map.TryGetValue(name, out var val))
+            {
+                name = name.Remove(name.LastIndexOf("."));
+                _map.TryGetValue(name, out val);
+                val += "." + _openQuote + node.Member.GetColumnAttributeName() + _closeQuote;
+            }
+            _sqlCmd.Append(val);
             return node;
         }
 

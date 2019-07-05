@@ -33,7 +33,9 @@ namespace LnskyDB
         }
         public ISelectResult<TResult> Select<TResult>(Expression<Func<T, TResult>> select, bool firstTableSelectAll = false)
         {
-            var selectResult = new JoinSelectExpression(select, Map);
+            var p = new DynamicParameters();
+            p.AddDynamicParams(Param);
+            var selectResult = new JoinSelectExpression(select, Map, p);           
             var selSql = string.Join(",", selectResult.QueryColumns);
             if (firstTableSelectAll)
             {
@@ -48,7 +50,7 @@ namespace LnskyDB
             }
             string sql = $"SELECT {selSql} FROM {JoinStr} WHERE 1=1 {Where}";
 
-            return new SelectResult<TResult>(sql, Param);
+            return new SelectResult<TResult>(sql, p);
         }
 
     }

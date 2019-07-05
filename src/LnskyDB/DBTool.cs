@@ -406,22 +406,28 @@ namespace LnskyDB
         internal static DynamicParameters SetWhereSql<T>(IQuery<T> query, StringBuilder sql, bool isOnlyWhere = false, string tableAlias = "") where T : BaseDBModel
         {
             var dynamicParameters = new DynamicParameters();
+            if (query.DBModel.GetDBModel_ChangeList().Count > 0)
+            {
+                throw new DapperExtensionException("查询实体不可以赋值!");
+            }
+
             var whereSql = GetSql(query.DBModel.GetDBModel_ChangeList(), "AND", tableAlias);
             if (!string.IsNullOrEmpty(whereSql))
             {
+                throw new DapperExtensionException("查询实体不可以赋值!");
                 sql.Append(" AND ");
                 sql.Append(whereSql);
                 dynamicParameters.AddDynamicParams(query.DBModel);
 
             }
-            var where = new WhereExpression(query.WhereExpression, "", tableAlias);
+
+            var where = new WhereExpression(query.WhereExpression, "", tableAlias, dynamicParameters);
             sql.Append(where.SqlCmd);
             if (!isOnlyWhere)
             {
                 sql.Append(GetOrderBy(query.OrderbyList));
                 sql.Append(GetLimit(query));
             }
-            dynamicParameters.AddDynamicParams(where.Param);
             return dynamicParameters;
         }
 
