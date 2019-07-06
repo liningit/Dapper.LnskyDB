@@ -50,17 +50,23 @@ namespace LnskyDB.Demo.Controllers
 
         // GET http://localhost:53277/ProductSaleByDay/GetList
         [HttpGet]
-        public ActionResult<List<ProductSaleByDayEntity>> GetList()
+        public ActionResult<object> GetList()
         {
             var s = QueryFactory.Create<ProductSaleByDayNSEntity>();
 
             var temp = s.InnerJoin(QueryFactory.Create<ProductSaleByDayNSEntity>(),
               m => new { OS = m.ShopName + m.OutProductID + "1" }, m => new { OS = m.ShopName + m.OutProductID + "1" },
-              (x, y) => new { SysNo = y.Sales + x.NumberOfSales, t = y.ShopName + "," + x.ShopName, NS = y, x });
-            var r = temp.Select(m => DBFunction.Function<int>("max", m.SysNo + 1));
+              (x, y) => new { uu = y.Sales + x.NumberOfSales, t = y.ShopName + "," + x.ShopName, NS = y, x });
+            var temp2 = temp.InnerJoin(QueryFactory.Create<ProductSaleByDayNSEntity>(), m => new { T = m.x.SysNo }, m => new { T = m.SysNo },
+                 (x, y) => x);
+            var temp3 = temp2.InnerJoin(QueryFactory.Create<ProductSaleByDayNSEntity>(), m => new { T = m.NS.SysNo }, m => new { T = m.SysNo },
+                (x, y) => new { ud = x, y });
+            temp3.And(x => x.ud.t.Contains("1"));
+            temp3.Or(y => y.ud.uu >= 0);
+            var r = temp3.Select(m => DBFunction.Function<int?>("max", m.ud.uu + m.y.Sales + 3));
             var repository = new ProductSaleByDayNSRepository(); ;
             var tr = repository.GetList(r);
-            return null;
+            return tr;
 
         }
         //GET http://localhost:53277/ProductSaleByDay/GetPaging

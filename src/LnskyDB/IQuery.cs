@@ -23,9 +23,10 @@ namespace LnskyDB
 
         IQuery<T> OrderBy<TProperty>(Expression<Func<T, TProperty>> field);
 
-        IQuery<T> OrderByDescing<TProperty>(Expression<Func<T, TProperty>> field);        
+        IQuery<T> OrderByDescing<TProperty>(Expression<Func<T, TProperty>> field);
         IQuery<T> QueryiSearch<TProperty>(Expression<Func<T, TProperty>> field, string queryVal);
 
+        IJoinQuery<TResult> OuterJoin<TR, TKey, TResult>(IQuery<TR> inner, Expression<Func<T, TKey>> outerKeySelector, Expression<Func<TR, TKey>> innerKeySelector, Expression<Func<T, TR, TResult>> resultSelector) where TR : BaseDBModel, new();
         IJoinQuery<TResult> InnerJoin<TR, TKey, TResult>(IQuery<TR> inner, Expression<Func<T, TKey>> outerKeySelector, Expression<Func<TR, TKey>> innerKeySelector, Expression<Func<T, TR, TResult>> resultSelector) where TR : BaseDBModel, new();
 
     }

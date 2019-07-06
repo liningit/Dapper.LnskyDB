@@ -403,7 +403,7 @@ namespace LnskyDB
         }
 
 
-        internal static DynamicParameters SetWhereSql<T>(IQuery<T> query, StringBuilder sql, bool isOnlyWhere = false, string tableAlias = "") where T : BaseDBModel
+        internal static DynamicParameters SetWhereSql<T>(IQuery<T> query, StringBuilder sql, bool isOnlyWhere = false) where T : BaseDBModel
         {
             var dynamicParameters = new DynamicParameters();
             if (query.DBModel.GetDBModel_ChangeList().Count > 0)
@@ -411,7 +411,7 @@ namespace LnskyDB
                 throw new DapperExtensionException("查询实体不可以赋值!");
             }
 
-            var whereSql = GetSql(query.DBModel.GetDBModel_ChangeList(), "AND", tableAlias);
+            var whereSql = GetSql(query.DBModel.GetDBModel_ChangeList(), "AND", "");
             if (!string.IsNullOrEmpty(whereSql))
             {
                 throw new DapperExtensionException("查询实体不可以赋值!");
@@ -421,7 +421,7 @@ namespace LnskyDB
 
             }
 
-            var where = new WhereExpression(query.WhereExpression, "", tableAlias, dynamicParameters);
+            var where = new WhereExpression(query.WhereExpression, "", dynamicParameters);
             sql.Append(where.SqlCmd);
             if (!isOnlyWhere)
             {

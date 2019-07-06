@@ -103,7 +103,16 @@ namespace LnskyDB
             return QueryiSearch(((MemberExpression)field.Body).Member.Name, queryVal);
         }
 
+        public IJoinQuery<TResult> OuterJoin<TR, TKey, TResult>(IQuery<TR> rightQuery, Expression<Func<T, TKey>> leftKeySelector, Expression<Func<TR, TKey>> rightKeySelector, Expression<Func<T, TR, TResult>> resultSelector) where TR : BaseDBModel, new()
+        {
+            return Join("OUTER", rightQuery, leftKeySelector, rightKeySelector, resultSelector);
+        }
         public IJoinQuery<TResult> InnerJoin<TR, TKey, TResult>(IQuery<TR> rightQuery, Expression<Func<T, TKey>> leftKeySelector, Expression<Func<TR, TKey>> rightKeySelector, Expression<Func<T, TR, TResult>> resultSelector) where TR : BaseDBModel, new()
+        {
+            return Join("INNER", rightQuery, leftKeySelector, rightKeySelector, resultSelector);
+        }
+
+        private IJoinQuery<TResult> Join<TR, TKey, TResult>(string type, IQuery<TR> rightQuery, Expression<Func<T, TKey>> leftKeySelector, Expression<Func<TR, TKey>> rightKeySelector, Expression<Func<T, TR, TResult>> resultSelector) where TR : BaseDBModel, new()
         {
             var dynamicParameters = new DynamicParameters();
             var left = new JoinExpression(leftKeySelector, new Dictionary<string, string> { { "", "t1" } }, dynamicParameters);
@@ -122,27 +131,25 @@ namespace LnskyDB
                 sqlJoin.Append(right.JoinDic[v.Key]);
                 sqlJoin.Append(")");
             }
-            var joinStr = $"{DBTool.GetTableName(DBModel)} t1 INNER JOIN {DBTool.GetTableName(rightQuery.DBModel)} t2 ON {sqlJoin}";
+            var joinStr = $"{DBTool.GetTableName(DBModel)} t1 {type} JOIN {DBTool.GetTableName(rightQuery.DBModel)} t2 ON {sqlJoin}";
 
             var sel = new JoinResultMapExpression(resultSelector, new Dictionary<string, string> { { "", "t1" } }, "t2", dynamicParameters);
             StringBuilder sqlWhere = new StringBuilder();
 
-            var where = new WhereExpression(this.WhereExpression, "", "t1", dynamicParameters);
+            var where = new WhereExpression(this.WhereExpression,  "t1", dynamicParameters);
             if (!string.IsNullOrEmpty(where.SqlCmd))
             {
                 sqlWhere.Append(where.SqlCmd);
 
             }
 
-            where = new WhereExpression(rightQuery.WhereExpression, "", "t2", dynamicParameters);
+            where = new WhereExpression(rightQuery.WhereExpression,  "t2", dynamicParameters);
             if (!string.IsNullOrEmpty(where.SqlCmd))
             {
                 sqlWhere.Append(where.SqlCmd);
             }
 
-            return new JoinQueryInfo<TResult>(joinStr, sel.MapList, sqlWhere.ToString(), dynamicParameters);
+            return new JoinQueryInfo<TResult>(joinStr, 2, sel.MapList, sqlWhere.ToString(), dynamicParameters);
         }
-
-
     }
 }

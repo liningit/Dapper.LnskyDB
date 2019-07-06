@@ -12,7 +12,7 @@ namespace LnskyDB.Helper
     {
         public Dictionary<string, string> MapList = new Dictionary<string, string>();
         Dictionary<string, string> _map = new Dictionary<string, string>();
-
+        string _namePre = string.Empty;
 
         public JoinResultMapExpression(LambdaExpression expression, Dictionary<string, string> left, string right, DynamicParameters para) : base(para)
         {
@@ -29,6 +29,19 @@ namespace LnskyDB.Helper
             if (_sqlCmd.Length > 0)
             {
                 MapList.Add("", _sqlCmd.ToString());
+                _sqlCmd.Clear();
+            }
+            if (!string.IsNullOrEmpty(_namePre))
+            {
+                _namePre = _namePre + ".";
+                foreach (var d in _map)
+                {
+                    if (d.Key.StartsWith(_namePre))
+                    {
+                        MapList.Add(d.Key.Substring(_namePre.Length), d.Value);
+                    }
+                }
+                _namePre = "";
             }
         }
 
@@ -38,9 +51,23 @@ namespace LnskyDB.Helper
             for (int i = 0; i < node.Arguments.Count; i++)
             {
                 Visit(node.Arguments[i]);
-                MapList.Add(node.Members[i].Name, _sqlCmd.ToString());
+                if (_sqlCmd.Length > 0)
+                {
+                    MapList.Add(node.Members[i].Name, _sqlCmd.ToString());
+                }
+                if (!string.IsNullOrEmpty(_namePre))
+                {
+                    _namePre = _namePre + ".";
+                    foreach (var d in _map)
+                    {
+                        if (d.Key.StartsWith(_namePre))
+                        {
+                            MapList.Add(node.Members[i].Name + "." + d.Key.Substring(_namePre.Length), d.Value);
+                        }
+                    }
+                }
                 _sqlCmd.Clear();
-
+                _namePre = string.Empty;
             }
             return node;
         }
@@ -50,7 +77,14 @@ namespace LnskyDB.Helper
         }
         protected override Expression VisitParameter(ParameterExpression node)
         {
-            _sqlCmd.Append(_map[node.Name]);
+            if (_map.ContainsKey(node.Name))
+            {
+                _sqlCmd.Append(_map[node.Name]);
+            }
+            else
+            {
+                _namePre = node.Name;
+            }
             return node;
 
         }
@@ -66,8 +100,14 @@ namespace LnskyDB.Helper
             if (!_map.TryGetValue(name, out var val))
             {
                 name = name.Remove(name.LastIndexOf("."));
-                _map.TryGetValue(name, out val);
-                val += "." + _openQuote + node.Member.GetColumnAttributeName() + _closeQuote;
+                if (_map.TryGetValue(name, out val))
+                {
+                    val += "." + _openQuote + node.Member.GetColumnAttributeName() + _closeQuote;
+                }
+                else
+                {
+                    _namePre = node.ToString();
+                }
             }
             _sqlCmd.Append(val);
             return node;
