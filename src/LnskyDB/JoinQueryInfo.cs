@@ -4,6 +4,7 @@ using LnskyDB.Helper;
 using LnskyDB.Model;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 
@@ -103,7 +104,7 @@ namespace LnskyDB
 
             return new JoinQueryInfo<TResult>(joinStr, JoinTableCount + 1, sel.MapList, sqlWhere.ToString(), dynamicParameters);
         }
-        public ISelectResult<TResult> Select<TResult>(Expression<Func<T, TResult>> select, bool firstTableSelectAll = false)
+        public ISelectResult<TResult> Select<TResult>(Expression<Func<T, TResult>> select, bool firstTableSelectAll = false) where TResult : new()
         {
             var p = new DynamicParameters();
             p.AddDynamicParams(Param);
@@ -120,11 +121,36 @@ namespace LnskyDB
                     selSql = "t1.*";
                 }
             }
-            var where = new JoinWhereExpression(WhereExpression, Map, p);
+            var isDBModel = typeof(TResult).IsAssignableFrom(typeof(BaseDBModel));
+            if (isDBModel)
+            {
+                selSql = "0 as DBModel_IsBeginChange," + selSql;
+            }
+            var whereExpression = new JoinWhereExpression(WhereExpression, Map, p);
+            var sql = new StringBuilder($"SELECT {selSql} FROM {JoinStr} WHERE 1=1 {Where} {whereExpression.SqlCmd} ");
+            var countSql = new StringBuilder($"SELECT count(1) FROM {JoinStr} WHERE 1=1 {Where} {whereExpression.SqlCmd} ");
+            if (OrderbyList.Count > 0)
+            {
+                sql.Append($" ORDER BY ");
+                var olst = OrderbyList.Select(m =>
+                  {
+                      var order = new JoinOrderExpression(m.Field, Map, p);
+                      return order.SqlCmd + " " + m.OrderBy;
+                  });
+                sql.Append(string.Join(",", olst) + " ");
+            }
 
-            string sql = $"SELECT {selSql} FROM {JoinStr} WHERE 1=1 {Where} {where.SqlCmd}";
+            if (StarSize != 0 || Rows != 0)
+            {
+                sql.Append($" OFFSET {StarSize } ROWS ");
+                if (Rows != 0)
+                {
+                    sql.Append($"  FETCH NEXT {Rows} ROWS ONLY ");
 
-            return new SelectResult<TResult>(sql, p);
+                }
+            }
+
+            return new SelectResult<TResult>(sql.ToString(), countSql.ToString(), p);
         }
 
     }

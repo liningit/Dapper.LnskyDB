@@ -425,7 +425,7 @@ namespace LnskyDB
             sql.Append(where.SqlCmd);
             if (!isOnlyWhere)
             {
-                sql.Append(GetOrderBy(query.OrderbyList));
+                sql.Append(GetOrderBy(query.OrderbyList, dynamicParameters));
                 sql.Append(GetLimit(query));
             }
             return dynamicParameters;
@@ -448,12 +448,13 @@ namespace LnskyDB
 
             return $" OFFSET {query.StarSize } ROWS FETCH NEXT {query.Rows} ROWS ONLY";
         }
-        private static string GetOrderBy(List<OrderCriteria> orderByLst)
+        private static string GetOrderBy(List<OrderCriteria> orderByLst, DynamicParameters dynamicParameters)
         {
             var orderByList = orderByLst.Select(a =>
             {
-                var columnName = ((MemberExpression)a.Field.Body).Member.GetColumnAttributeName();
-                return ProviderOption.Option.CombineFieldName(columnName) + (a.OrderBy == EOrderBy.Asc ? " ASC " : " DESC ");
+
+                var o = new JoinOrderExpression(a.Field, new Dictionary<string, string> { { "", "" } }, dynamicParameters);
+                return o.SqlCmd + (a.OrderBy == EOrderBy.Asc ? " ASC " : " DESC ");
             }).ToList();
 
             if (!orderByList.Any())

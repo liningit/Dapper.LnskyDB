@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using LnskyDB;
+using LnskyDB.Demo.Entity.Data;
 using LnskyDB.Demo.Entity.Purify;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -15,15 +16,12 @@ namespace Lnsky.Test.Controllers
 
         public static object lockObj = new object();
         static List<string> lstDataSource = new List<string> { "测试来源1", "测试来源2", "自动生成" };
-        static Dictionary<Guid, string> dicShop = new Dictionary<Guid, string> {
-            { Guid.Parse("2E3E3B71-94B5-4C16-BFAC-2FF136B78FF5"), "测试店铺1" },
-            { Guid.Parse("4E37A7E1-8BAC-44C9-B128-58E4049E3CCF"), "测试店铺2" }
-        };
+        static List<ShopEntity> lstShop = new List<ShopEntity>();
         static Dictionary<Guid, string> dicProduct = new Dictionary<Guid, string>();
         static InitController()
         {
-            
-    InitDic(dicProduct, "测试商品", 10);
+
+            InitDic(dicProduct, "测试商品", 10);
         }
         private static void InitDic(Dictionary<Guid, string> dic, string namePre, int count)
         {
@@ -42,9 +40,26 @@ namespace Lnsky.Test.Controllers
             }
             lock (lockObj)
             {
+
                 isRuning = true;
                 try
                 {
+                    var shopRepository = RepositoryFactory.Create<ShopEntity>();
+                    shopRepository.Delete(QueryFactory.Create<ShopEntity>());
+                    for (int i = 0; i < 10; i++)
+                    {
+
+
+                        var shop = new ShopEntity
+                        {
+                            SysNo = Guid.NewGuid(),
+                            ShopCode = "00" + i,
+                            ShopName = "测试店铺" + i,
+                            ShopType = i % 3
+                        };
+                        shopRepository.Add(shop);
+                    }
+                    lstShop = shopRepository.GetList(QueryFactory.Create<ShopEntity>());
                     var importGroupId = Guid.NewGuid();
                     var random = new Random();
                     var repositoryFactory = RepositoryFactory.Create<ProductSaleByDayEntity>();
@@ -65,8 +80,8 @@ namespace Lnsky.Test.Controllers
                             var tempNS = new ProductSaleByDayNSEntity();
                             tempNS.SysNo = temp.SysNo = Guid.NewGuid();
                             tempNS.DataSource = temp.DataSource = lstDataSource[random.Next(lstDataSource.Count)];
-                            tempNS.ShopID = temp.ShopID = dicShop.Keys.ToList()[random.Next(dicShop.Count)];
-                            tempNS.ShopName = temp.ShopName = dicShop[temp.ShopID];
+                            tempNS.ShopID = temp.ShopID = lstShop[random.Next(lstShop.Count)].SysNo;
+
                             tempNS.ProductID = temp.ProductID = p.Key;
                             tempNS.OutProductID = temp.OutProductID = p.Value;
                             tempNS.ProductName = temp.ProductName = p.Value;

@@ -8,6 +8,6 @@ namespace LnskyDB
     public interface ISelectResult<T>
     {
         string SqlCmd { get; set; }
-        DynamicParameters Param { get; set; }
-    }
+        string CountSqlCmd { get; set; }
+        DynamicParameters Param { get; set; }    }
 }

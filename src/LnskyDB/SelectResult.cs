@@ -8,10 +8,12 @@ namespace LnskyDB
     public class SelectResult<T> : ISelectResult<T>
     {
         public string SqlCmd { get; set; }
-        public DynamicParameters Param { get; set; }
-        public SelectResult(string sqlCmd, DynamicParameters param)
+        public string CountSqlCmd { get; set; }
+        public DynamicParameters Param { get; set; } 
+        public SelectResult(string sqlCmd, string countSqlCmd, DynamicParameters param )
         {
             SqlCmd = sqlCmd;
+            CountSqlCmd = countSqlCmd;
             Param = param;
         }
     }

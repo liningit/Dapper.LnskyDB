@@ -20,6 +20,8 @@ namespace LnskyDB
         Paging<T> GetPaging(IQuery<T> query, DateTime stTime, DateTime endime);
 
         Paging<T> GetPaging(IQuery<T> query);
+        Paging<R> GetPaging<R>(ISelectResult<R> query);
+
         bool Update(T obj);
         List<T> GetList(string sql, object par);
         List<R> GetList<R>(string sql, object par);

@@ -1,59 +1,31 @@
 ﻿using Dapper;
 using LnskyDB.Helper;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 
 namespace LnskyDB.Expressions
 {
-    internal class JoinSelectExpression : BaseExpressionVisitor
+    public class JoinOrderExpression : BaseExpressionVisitor
     {
-
-        public List<string> QueryColumns = new List<string>();
-
         Dictionary<string, string> _map = new Dictionary<string, string>();
 
-        public JoinSelectExpression(LambdaExpression expression, Dictionary<string, string> map, DynamicParameters para) : base(para)
+
+        public string SqlCmd => _sqlCmd.Length > 0 ? $" {_sqlCmd} " : "";
+        public JoinOrderExpression(LambdaExpression expression, Dictionary<string, string> m, DynamicParameters para) : base(para)
         {
-            foreach (var v in map)
+
+            _tempFieldName = "PJO_" + GetHashCode() + "_";
+            foreach (var v in m)
             {
                 var key = string.IsNullOrEmpty(v.Key) ? expression.Parameters[0].Name : (expression.Parameters[0].Name + "." + v.Key);
                 _map.Add(key, v.Value);
             }
-            _tempFieldName = "PJS_" + GetHashCode() + "_";
+
             var exp = TrimExpression.Trim(expression);
             Visit(exp);
-            if (_sqlCmd.Length > 0)
-            {
-                var sql = _sqlCmd.ToString();
-                if (!sql.Contains("."))
-                {
-                    sql += ".*";
-                }
-                QueryColumns.Add(sql);
-                _sqlCmd.Clear();
-            }
         }
-
-
-        #region 访问成员表达式
-
-
-        protected override Expression VisitMemberInit(MemberInitExpression node)
-        {
-            for (int i = 0; i < node.Bindings.Count; i++)
-            {
-                var m = node.Bindings[i] as MemberAssignment;
-                Visit(m.Expression);
-                QueryColumns.Add(_sqlCmd.ToString() + " " + node.Bindings[i].Member.Name);
-                _sqlCmd.Clear();
-            }
-            return node;
-        }
-
         /// <inheritdoc />
         /// <summary>
         /// 访问成员表达式
@@ -68,7 +40,11 @@ namespace LnskyDB.Expressions
                 name = name.Remove(name.LastIndexOf("."));
                 if (_map.TryGetValue(name, out val))
                 {
-                    val += "." + _openQuote + node.Member.GetColumnAttributeName() + _closeQuote;
+                    if (!string.IsNullOrEmpty(val))
+                    {
+                        val += ".";
+                    }
+                    val += _openQuote + node.Member.GetColumnAttributeName() + _closeQuote;
                 }
                 else
                 {
@@ -78,10 +54,5 @@ namespace LnskyDB.Expressions
             _sqlCmd.Append(val);
             return node;
         }
-
-        #endregion
-
-
-
     }
 }

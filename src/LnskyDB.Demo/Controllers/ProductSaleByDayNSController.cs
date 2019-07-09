@@ -1,4 +1,5 @@
 ﻿
+using LnskyDB.Demo.Entity.Data;
 using LnskyDB.Demo.Entity.Purify;
 using LnskyDB.Demo.Repository.Purify;
 using Microsoft.AspNetCore.Mvc;
@@ -73,6 +74,7 @@ namespace LnskyDB.Demo.Controllers
             var query = QueryFactory.Create<ProductSaleByDayNSEntity>(m => DBFunction.Function<DateTime>("ISNULL", m.UpdateDate, DateTime.Now) > new DateTime(2019, 6, 26));
 
             query.OrderByDescing(m => m.StatisticalDate);
+            query.OrderByDescing(m => m.Sales + 1);
             query.StarSize = 0;
             query.Rows = 10;
             var paging = repository.GetPaging(query);
@@ -91,7 +93,6 @@ namespace LnskyDB.Demo.Controllers
                 DataSource = "新增测试来源",
                 ProductID = Guid.NewGuid(),
                 ShopID = Guid.NewGuid(),
-                ShopName = "测试店铺",
                 ProductName = "测试商品",
                 OutProductID = Guid.NewGuid().ToString(),
                 ImportGroupId = Guid.NewGuid(),
@@ -109,7 +110,6 @@ namespace LnskyDB.Demo.Controllers
             {
                 SysNo = Guid.Parse("650BC09C-2B9C-467B-A457-8B4853CC1F0F"),
                 DataSource = "测试来源修改",
-                ShopName = "店铺修改",
                 StatisticalDate = new DateTime(2019, 01, 05),
             };
             var repository = GetRepository();
@@ -123,7 +123,6 @@ namespace LnskyDB.Demo.Controllers
             var updateEntity = new ProductSaleByDayNSEntity()
             {
                 DataSource = "测试来源修改",
-                ShopName = "店铺修改Where",
 
             };
             var repository = GetRepository();
@@ -159,6 +158,25 @@ namespace LnskyDB.Demo.Controllers
             return repository.Delete(where);
         }
 
+        //GET http://localhost:53277/ProductSaleByDayNS/GetJoinPaging
+        [HttpGet]
+        public ActionResult<Paging<ProductSaleByDayNSEntity>> GetJoinPaging()
+        {
+            var repository = GetRepository();
+            var query = QueryFactory.Create<ProductSaleByDayNSEntity>(m => DBFunction.Function<DateTime>("ISNULL", m.UpdateDate, DateTime.Now) > new DateTime(2019, 6, 26));
+            var jq = query.InnerJoin(QueryFactory.Create<ShopEntity>(), m => m.ShopID, m => m.SysNo, (x, y) => new { Sale = x, Shop = y });
+            jq.And(m => m.Shop.ShopName.Contains("店铺"));
+            jq.OrderByDescing(m => m.Sale.Sales + 1);
+            jq.OrderBy(m => m.Sale.ProductName + m.Sale.OutProductID);
+            jq.StarSize = 10;
+            jq.Rows = 5;
+            var res = jq.Select(m => m.Sale);
+
+            var paging = repository.GetPaging(res);
+            var count = paging.TotalCount;
+            var lst = paging.ToList();//或者paging.Items
+            return paging;
+        }
 
         [HttpGet]
         public void TestThread(string shopName, DateTime shuffledTempDate, string dataSource)

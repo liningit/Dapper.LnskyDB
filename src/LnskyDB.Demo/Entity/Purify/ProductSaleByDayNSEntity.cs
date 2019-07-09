@@ -63,12 +63,6 @@ namespace LnskyDB.Demo.Entity.Purify
 		/// </summary>		
 		public Guid ShopID { get { return _ShopID; } set { Change("ShopID"); _ShopID = value; } }
 		
-		string _ShopName;
-		/// <summary>
-		/// 店铺名称
-		/// </summary>		
-		public string ShopName { get { return _ShopName; } set { Change("ShopName"); _ShopName = value; } }
-		
 		DateTime _StatisticalDate;
 		/// <summary>
 		/// 统计日期
