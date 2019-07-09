@@ -50,24 +50,23 @@ namespace LnskyDB.Demo.Controllers
 
         // GET http://localhost:53277/ProductSaleByDay/GetList
         [HttpGet]
-        public ActionResult<object> GetList()
+        public ActionResult<List<ProductSaleByDayEntity>> GetList()
         {
-            var s = QueryFactory.Create<ProductSaleByDayNSEntity>();
 
-            var temp = s.InnerJoin(QueryFactory.Create<ProductSaleByDayNSEntity>(),
-              m => new { OS =  m.OutProductID + "1" }, m => new { OS =m.OutProductID + "1" },
-              (x, y) => new { uu = y.Sales + x.NumberOfSales, t = "," , NS = y, x });
-            var temp2 = temp.InnerJoin(QueryFactory.Create<ProductSaleByDayNSEntity>(), m => new { T = m.x.SysNo }, m => new { T = m.SysNo },
-                 (x, y) => x);
-            var temp3 = temp2.InnerJoin(QueryFactory.Create<ProductSaleByDayNSEntity>(), m => new { T = m.NS.SysNo }, m => new { T = m.SysNo },
-                (x, y) => new { ud = x, y });
-            temp3.And(x => x.ud.t.Contains("1"));
-            temp3.Or(y => y.ud.uu + y.ud.x.Sales >= 0);
-            var r = temp3.Select(m => DBFunction.Function<int?>("max", m.ud.uu + m.y.Sales + 3));
-            var repository = new ProductSaleByDayNSRepository(); ;
-            var tr = repository.GetList(r);
-            return tr;
+            var stTime = new DateTime(2019, 1, 15);
+            var endTime = new DateTime(2019, 2, 11);
+            var repository = GetRepository();
+            var query = QueryFactory.Create<ProductSaleByDayEntity>(m => m.ShopName.Contains("测试"));
+            query.And(m => m.StatisticalDate >= stTime);
+            query.And(m => m.StatisticalDate < endTime.Date.AddDays(1));
+            query.DBModel.DBModel_ShuffledTempDate = new DateTime(2019, 01, 01);//这儿表示查19年1月的库和表
+            query.OrderByDescing(m => m.StatisticalDate);
+            query.StarSize = 20;
+            query.Rows = 10;
+            //分库的传入stTime,endTime会自动根据时间查询符合条件的库和表
+            var lst = repository.GetList(query);
 
+            return lst;
         }
         //GET http://localhost:53277/ProductSaleByDay/GetPaging
         [HttpGet]

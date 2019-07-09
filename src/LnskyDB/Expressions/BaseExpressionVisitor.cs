@@ -9,7 +9,7 @@ using System.Text;
 
 namespace LnskyDB.Expressions
 {
-    public class BaseExpressionVisitor : ExpressionVisitor
+    internal class BaseExpressionVisitor : ExpressionVisitor
     {
         public BaseExpressionVisitor(DynamicParameters param)
         {

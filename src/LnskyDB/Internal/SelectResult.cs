@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using Dapper;
 
-namespace LnskyDB
+namespace LnskyDB.Internal
 {
-    public class SelectResult<T> : ISelectResult<T>
+    internal class SelectResult<T> : ISelectResult<T>
     {
         public string SqlCmd { get; set; }
         public string CountSqlCmd { get; set; }

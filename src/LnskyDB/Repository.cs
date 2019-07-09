@@ -5,17 +5,18 @@ using Dapper;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using LnskyDB.Internal;
 
 namespace LnskyDB
 {
-    public abstract class Repository<T> : BaseRepository<T> where T : BaseDBModel, new()
+    public abstract class Repository<T> : AbstractRepository<T> where T : BaseDBModel, new()
     {
         public Repository() : base(new T()) { }
     }
-    public abstract class BaseRepository<T> : IRepository<T> where T : BaseDBModel
+    public abstract class AbstractRepository<T> : IRepository<T> where T : BaseDBModel
     {
         private T dbModel = null;
-        internal BaseRepository(T obj)
+        internal AbstractRepository(T obj)
         {
             dbModel = obj ?? throw new Exception("对象不可为空");
 

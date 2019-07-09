@@ -8,9 +8,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 
-namespace LnskyDB
+namespace LnskyDB.Internal
 {
-    public class JoinQueryInfo<T> : IJoinQuery<T>
+    internal class JoinQueryInfo<T> : IJoinQuery<T>
     {
         public long StarSize { get; set; }
         public int Rows { get; set; }

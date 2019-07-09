@@ -1,4 +1,5 @@
-﻿using LnskyDB.Model;
+﻿using LnskyDB.Internal;
+using LnskyDB.Model;
 using LnskyDB.Tool;
 using System;
 using System.Collections.Generic;

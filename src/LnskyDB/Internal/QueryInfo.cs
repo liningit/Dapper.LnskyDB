@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-namespace LnskyDB
+namespace LnskyDB.Internal
 {
     internal class QueryInfo<T> : IQuery<T> where T : BaseDBModel, new()
     {

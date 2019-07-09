@@ -171,8 +171,10 @@ namespace LnskyDB.Demo.Controllers
             jq.StarSize = 10;
             jq.Rows = 5;
             var res = jq.Select(m => m.Sale);
-
             var paging = repository.GetPaging(res);
+            //也可以下面这样返回dto.第二个参数表示第一个表是否要查询所有列.
+            var res2 = jq.Select(m => new PSDto { ShopName = m.Shop.ShopName }, true);
+            var paging2 = repository.GetPaging(res2);
             var count = paging.TotalCount;
             var lst = paging.ToList();//或者paging.Items
             return paging;

@@ -7,7 +7,7 @@ using System.Text;
 
 namespace LnskyDB.Expressions
 {
-    public class JoinOrderExpression : BaseExpressionVisitor
+    internal class JoinOrderExpression : BaseExpressionVisitor
     {
         Dictionary<string, string> _map = new Dictionary<string, string>();
 
