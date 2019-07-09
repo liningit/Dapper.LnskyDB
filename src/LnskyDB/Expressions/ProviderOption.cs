@@ -6,6 +6,7 @@ namespace LnskyDB.Expressions
 {
     internal class ProviderOption
     {
+        public static ProviderOption Option { get; }= new ProviderOption('[', ']', '@');
         public ProviderOption(char openQuote, char closeQuote, char parameterPrefix)
         {
             OpenQuote = openQuote;

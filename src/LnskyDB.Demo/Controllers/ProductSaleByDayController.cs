@@ -1,9 +1,12 @@
-﻿ 
+﻿
 using LnskyDB.Demo.Entity.Purify;
 using LnskyDB.Demo.Repository.Purify;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Collections.Generic;
+using LnskyDB.Model;
 
 namespace LnskyDB.Demo.Controllers
 {
@@ -24,7 +27,7 @@ namespace LnskyDB.Demo.Controllers
             {
                 //也可以继承实例化
                 return new ProductSaleByDayRepository();
-            }    
+            }
         }
         // GET http://localhost:53277/ProductSaleByDay/Get
 

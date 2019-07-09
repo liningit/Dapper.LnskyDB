@@ -16,7 +16,7 @@ namespace LnskyDB
             return new RepositoryA<T>(obj);
         }
 
-        private class RepositoryA<T> : BaseRepository<T> where T : BaseDBModel
+        private class RepositoryA<T> : AbstractRepository<T> where T : BaseDBModel
         {
             public RepositoryA(T obj) : base(obj) { }
         }

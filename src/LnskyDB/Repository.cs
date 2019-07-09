@@ -5,17 +5,18 @@ using Dapper;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using LnskyDB.Internal;
 
 namespace LnskyDB
 {
-    public abstract class Repository<T> : BaseRepository<T> where T : BaseDBModel, new()
+    public abstract class Repository<T> : AbstractRepository<T> where T : BaseDBModel, new()
     {
         public Repository() : base(new T()) { }
     }
-    public abstract class BaseRepository<T> : IRepository<T> where T : BaseDBModel
+    public abstract class AbstractRepository<T> : IRepository<T> where T : BaseDBModel
     {
         private T dbModel = null;
-        internal BaseRepository(T obj)
+        internal AbstractRepository(T obj)
         {
             dbModel = obj ?? throw new Exception("对象不可为空");
 
@@ -121,7 +122,32 @@ namespace LnskyDB
 
         public List<R> GetList<R>(T obj, string sql, object par)
         {
-            return GetConn(obj).Query<R>(sql: sql, param: par, commandTimeout: CommandTimeout).AsList();
+            return GetList(GetConn(obj).Query<R>(sql: sql, param: par, commandTimeout: CommandTimeout)).AsList();
+        }
+
+        public List<R> GetList<R>(ISelectResult<R> query)
+        {
+            return GetList(GetConn(null).Query<R>(sql: query.SqlCmd, param: query.Param, commandTimeout: CommandTimeout)).AsList();
+        }
+        public Paging<R> GetPaging<R>(ISelectResult<R> query)
+        {
+            var lst = GetList(GetConn(null).Query<R>(sql: query.SqlCmd, param: query.Param, commandTimeout: CommandTimeout));
+            var count = GetConn(null).QuerySingleOrDefault<long>(sql: query.CountSqlCmd, param: query.Param, commandTimeout: CommandTimeout);
+            return new Paging<R>(count, lst);
+        }
+
+        private IEnumerable<R> GetList<R>(IEnumerable<R> lst)
+        {
+            if (typeof(R).IsAssignableFrom(typeof(BaseDBModel)))
+            {
+                foreach (var t in lst)
+                {
+                    var b = t as BaseDBModel;
+                    b.GetDBModel_ChangeList().Clear();
+                    b.BeginChange();
+                }
+            }
+            return lst;
         }
 
         public T Get(T obj, string sql, object par)
@@ -196,5 +222,7 @@ namespace LnskyDB
             return res.List;
 
         }
+
+
     }
 }

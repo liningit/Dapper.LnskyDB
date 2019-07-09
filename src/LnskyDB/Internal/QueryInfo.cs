@@ -1,12 +1,15 @@
-﻿using LnskyDB.Expressions;
+﻿using Dapper;
+using LnskyDB.Expressions;
+using LnskyDB.Helper;
 using LnskyDB.Model;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-namespace LnskyDB
+namespace LnskyDB.Internal
 {
     internal class QueryInfo<T> : IQuery<T> where T : BaseDBModel, new()
     {
@@ -98,6 +101,55 @@ namespace LnskyDB
         public IQuery<T> QueryiSearch<TProperty>(Expression<Func<T, TProperty>> field, string queryVal)
         {
             return QueryiSearch(((MemberExpression)field.Body).Member.Name, queryVal);
+        }
+
+        public IJoinQuery<TResult> OuterJoin<TR, TKey, TResult>(IQuery<TR> rightQuery, Expression<Func<T, TKey>> leftKeySelector, Expression<Func<TR, TKey>> rightKeySelector, Expression<Func<T, TR, TResult>> resultSelector) where TR : BaseDBModel, new()
+        {
+            return Join("OUTER", rightQuery, leftKeySelector, rightKeySelector, resultSelector);
+        }
+        public IJoinQuery<TResult> InnerJoin<TR, TKey, TResult>(IQuery<TR> rightQuery, Expression<Func<T, TKey>> leftKeySelector, Expression<Func<TR, TKey>> rightKeySelector, Expression<Func<T, TR, TResult>> resultSelector) where TR : BaseDBModel, new()
+        {
+            return Join("INNER", rightQuery, leftKeySelector, rightKeySelector, resultSelector);
+        }
+
+        private IJoinQuery<TResult> Join<TR, TKey, TResult>(string type, IQuery<TR> rightQuery, Expression<Func<T, TKey>> leftKeySelector, Expression<Func<TR, TKey>> rightKeySelector, Expression<Func<T, TR, TResult>> resultSelector) where TR : BaseDBModel, new()
+        {
+            var dynamicParameters = new DynamicParameters();
+            var left = new JoinExpression(leftKeySelector, new Dictionary<string, string> { { "", "t1" } }, dynamicParameters);
+
+            var right = new JoinExpression(rightKeySelector, new Dictionary<string, string> { { "", "t2" } }, dynamicParameters);
+            StringBuilder sqlJoin = new StringBuilder();
+            foreach (var v in left.JoinDic)
+            {
+                if (sqlJoin.Length > 0)
+                {
+                    sqlJoin.Append(" AND ");
+                }
+                sqlJoin.Append("(");
+                sqlJoin.Append(v.Value);
+                sqlJoin.Append("=");
+                sqlJoin.Append(right.JoinDic[v.Key]);
+                sqlJoin.Append(")");
+            }
+            var joinStr = $"{DBTool.GetTableName(DBModel)} t1 {type} JOIN {DBTool.GetTableName(rightQuery.DBModel)} t2 ON {sqlJoin}";
+
+            var sel = new JoinResultMapExpression(resultSelector, new Dictionary<string, string> { { "", "t1" } }, "t2", dynamicParameters);
+            StringBuilder sqlWhere = new StringBuilder();
+
+            var where = new WhereExpression(this.WhereExpression,  "t1", dynamicParameters);
+            if (!string.IsNullOrEmpty(where.SqlCmd))
+            {
+                sqlWhere.Append(where.SqlCmd);
+
+            }
+
+            where = new WhereExpression(rightQuery.WhereExpression,  "t2", dynamicParameters);
+            if (!string.IsNullOrEmpty(where.SqlCmd))
+            {
+                sqlWhere.Append(where.SqlCmd);
+            }
+
+            return new JoinQueryInfo<TResult>(joinStr, 2, sel.MapList, sqlWhere.ToString(), dynamicParameters);
         }
     }
 }

@@ -5,19 +5,21 @@ using System.Collections;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Collections.Generic;
 
 namespace LnskyDB.Expressions
 {
-    internal sealed class WhereExpression : BaseExpressionVisitor
+    internal sealed class JoinWhereExpression : BaseExpressionVisitor
     {
         #region sql指令
 
         /// <summary>
         /// sql指令
         /// </summary>
-        public  string SqlCmd => _sqlCmd.Length > 0 ? $" AND {_sqlCmd} " : "";    
- 
-        private readonly string _tableAlias;
+        public string SqlCmd => _sqlCmd.Length > 0 ? $" AND {_sqlCmd} " : "";
+
+        Dictionary<string, string> _map = new Dictionary<string, string>();
+
         #endregion
         #region 执行解析
 
@@ -29,14 +31,19 @@ namespace LnskyDB.Expressions
         /// <param name="prefix">字段前缀</param>
         /// <param name="providerOption"></param>
         /// <returns></returns>
-        public WhereExpression(LambdaExpression expression,  string tableAlias, DynamicParameters para) : base(para)
+        public JoinWhereExpression(LambdaExpression expression, Dictionary<string, string> map, DynamicParameters para) : base(para)
         {
-            _tempFieldName = "P_" + tableAlias + GetHashCode() + "_";     
-   
-            if (!string.IsNullOrEmpty(tableAlias))
+            if (expression == null)
             {
-                _tableAlias = tableAlias + ".";
+                return;
             }
+            foreach (var v in map)
+            {
+                var key = string.IsNullOrEmpty(v.Key) ? expression.Parameters[0].Name : (expression.Parameters[0].Name + "." + v.Key);
+                _map.Add(key, v.Value);
+            }
+            _tempFieldName = "PJW_" + GetHashCode() + "_";
+
             var exp = TrimExpression.Trim(expression);
             Visit(exp);
         }
@@ -51,7 +58,14 @@ namespace LnskyDB.Expressions
         /// <returns></returns>
         protected override System.Linq.Expressions.Expression VisitMember(MemberExpression node)
         {
-            _sqlCmd.Append(_tableAlias + _openQuote + node.Member.GetColumnAttributeName() + _closeQuote);
+            var name = node.ToString();
+            if (!_map.TryGetValue(name, out var val))
+            {
+                name = name.Remove(name.LastIndexOf("."));
+                _map.TryGetValue(name, out val);
+                val += "." + _openQuote + node.Member.GetColumnAttributeName() + _closeQuote;
+            }
+            _sqlCmd.Append(val);
             return node;
         }
         #endregion
