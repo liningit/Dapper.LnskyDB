@@ -15,7 +15,7 @@ namespace LnskyDB.Expressions
         public List<string> QueryColumns = new List<string>();
 
         Dictionary<string, string> _map = new Dictionary<string, string>();
-
+ 
         public JoinSelectExpression(LambdaExpression expression, Dictionary<string, string> map, DynamicParameters para) : base(para)
         {
             foreach (var v in map)
@@ -24,8 +24,8 @@ namespace LnskyDB.Expressions
                 _map.Add(key, v.Value);
             }
             _tempFieldName = "PJS_" + GetHashCode() + "_";
-            var exp = TrimExpression.Trim(expression);
-            Visit(exp);
+
+            Visit(expression.Body);
             if (_sqlCmd.Length > 0)
             {
                 var sql = _sqlCmd.ToString();
@@ -49,11 +49,23 @@ namespace LnskyDB.Expressions
                 var m = node.Bindings[i] as MemberAssignment;
                 Visit(m.Expression);
                 QueryColumns.Add(_sqlCmd.ToString() + " " + node.Bindings[i].Member.Name);
-                _sqlCmd.Clear();
+                _sqlCmd.Clear(); 
             }
             return node;
         }
+        protected override Expression VisitParameter(ParameterExpression node)
+        {
+            if (_map.ContainsKey(node.Name))
+            {
+                _sqlCmd.Append(_map[node.Name]);
+            }
+            else
+            {
+                throw new DapperExtensionException($"无法解析{node}");
+            }
+            return node;
 
+        }
         /// <inheritdoc />
         /// <summary>
         /// 访问成员表达式

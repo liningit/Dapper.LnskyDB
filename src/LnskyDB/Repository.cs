@@ -138,7 +138,7 @@ namespace LnskyDB
 
         private IEnumerable<R> GetList<R>(IEnumerable<R> lst)
         {
-            if (typeof(R).IsAssignableFrom(typeof(BaseDBModel)))
+            if (typeof(BaseDBModel).IsAssignableFrom(typeof(R)))
             {
                 foreach (var t in lst)
                 {

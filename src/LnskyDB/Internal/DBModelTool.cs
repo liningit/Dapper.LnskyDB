@@ -30,7 +30,7 @@ namespace LnskyDB.Internal
             try
             {
                 var lst = conn.Query<T>(sql: sql, param: obj, commandTimeout: commandTimeout).AsList();
-                lst.ForEach(m => m.GetDBModel_ChangeList().Clear());
+                lst.ForEach(m => { m.GetDBModel_ChangeList().Clear(); m.BeginChange(); });
                 return lst;
             }
             catch (Exception e)
@@ -75,13 +75,12 @@ namespace LnskyDB.Internal
         }
         internal static List<T> GetList<T>(this DbConnection conn, IQuery<T> query, int? commandTimeout = null) where T : BaseDBModel
         {
-            var sql = new StringBuilder($"SELECT 0 as DBModel_IsBeginChange, * FROM [{DBTool.GetTableName(query.DBModel)}] WHERE 1=1 ");
+            var sql = new StringBuilder($"SELECT * FROM [{DBTool.GetTableName(query.DBModel)}] WHERE 1=1 ");
             DynamicParameters dynamicParameters = SetWhereSql(query, sql);
-
             try
             {
                 var lst = conn.Query<T>(sql: sql.ToString(), param: dynamicParameters, commandTimeout: commandTimeout).AsList();
-                lst.ForEach(m => m.BeginChange());
+                lst.ForEach(m => { m.GetDBModel_ChangeList().Clear(); m.BeginChange(); });
                 return lst;
             }
             catch (Exception e)

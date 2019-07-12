@@ -121,7 +121,7 @@ namespace LnskyDB.Internal
                     selSql = "t1.*";
                 }
             }
-            var isDBModel = typeof(TResult).IsAssignableFrom(typeof(BaseDBModel));
+            var isDBModel = typeof(BaseDBModel).IsAssignableFrom(typeof(TResult));
             if (isDBModel)
             {
                 selSql = "0 as DBModel_IsBeginChange," + selSql;

@@ -136,20 +136,56 @@ namespace LnskyDB.Internal
             var sel = new JoinResultMapExpression(resultSelector, new Dictionary<string, string> { { "", "t1" } }, "t2", dynamicParameters);
             StringBuilder sqlWhere = new StringBuilder();
 
-            var where = new WhereExpression(this.WhereExpression,  "t1", dynamicParameters);
+            var where = new WhereExpression(this.WhereExpression, "t1", dynamicParameters);
             if (!string.IsNullOrEmpty(where.SqlCmd))
             {
                 sqlWhere.Append(where.SqlCmd);
 
             }
 
-            where = new WhereExpression(rightQuery.WhereExpression,  "t2", dynamicParameters);
+            where = new WhereExpression(rightQuery.WhereExpression, "t2", dynamicParameters);
             if (!string.IsNullOrEmpty(where.SqlCmd))
             {
                 sqlWhere.Append(where.SqlCmd);
             }
 
             return new JoinQueryInfo<TResult>(joinStr, 2, sel.MapList, sqlWhere.ToString(), dynamicParameters);
+        }
+
+        public ISelectResult<TResult> Select<TResult>(Expression<Func<T, TResult>> sel) where TResult : new()
+        {
+
+            var dynamicParameters = new DynamicParameters();
+            var selExp = new JoinSelectExpression(sel, new Dictionary<string, string> { { "", "[jtmp]" } }, dynamicParameters);
+            var selSql = string.Join(",", selExp.QueryColumns).Replace("[jtmp].", "");
+            var sql = new StringBuilder($"SELECT {selSql} FROM {DBTool.GetTableName(this.DBModel)} WHERE 1=1");
+            var countSql = new StringBuilder($"SELECT COUNT(1) FROM {DBTool.GetTableName(this.DBModel)} WHERE 1=1");
+
+            var whereExp = new WhereExpression(WhereExpression, "", dynamicParameters);
+            sql.Append(whereExp.SqlCmd);
+            countSql.Append(whereExp.SqlCmd);
+
+            if (OrderbyList.Count > 0)
+            {
+                sql.Append($" ORDER BY ");
+                var olst = OrderbyList.Select(m =>
+                {
+                    var order = new JoinOrderExpression(m.Field, new Dictionary<string, string> { { "", "" } }, dynamicParameters);
+                    return order.SqlCmd + " " + m.OrderBy;
+                });
+                sql.Append(string.Join(",", olst) + " ");
+            }
+
+            if (StarSize != 0 || Rows != 0)
+            {
+                sql.Append($" OFFSET {StarSize } ROWS ");
+                if (Rows != 0)
+                {
+                    sql.Append($"  FETCH NEXT {Rows} ROWS ONLY ");
+
+                }
+            }
+            return new SelectResult<TResult>(sql.ToString(), countSql.ToString(), dynamicParameters);
         }
     }
 }

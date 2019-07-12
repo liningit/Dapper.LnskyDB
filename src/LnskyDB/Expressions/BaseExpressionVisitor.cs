@@ -128,20 +128,55 @@ namespace LnskyDB.Expressions
             if (node.Method.DeclaringType == typeof(DBFunction))
             {
                 DBFunction(node);
-
+                return node;
             }
-            else if (node.Method.Name == "Contains" && typeof(IEnumerable).IsAssignableFrom(node.Method.DeclaringType) && node.Method.DeclaringType != typeof(string))
+            if (node.Method.DeclaringType.IsGenericType && node.Method.DeclaringType.GetGenericTypeDefinition() == typeof(ISelectResult<>))
+            {
+                SelectResultAnalysis(node);
+                return node;
+            }
+            if (Array.Exists(node.Method.DeclaringType.GetInterfaces(), t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(ISelectResult<>)))
+            {
+                return node;
+            }
+            if (node.Method.Name == "Contains" && typeof(IEnumerable).IsAssignableFrom(node.Method.DeclaringType) && node.Method.DeclaringType != typeof(string))
+            {
                 In(node);
-            else if (node.Method.Name == "Contains" && typeof(Enumerable) == node.Method.DeclaringType && node.Method.DeclaringType != typeof(string))
+                return node;
+            }
+            if (node.Method.Name == "Contains" && typeof(Enumerable) == node.Method.DeclaringType && node.Method.DeclaringType != typeof(string))
+            {
                 InEnumerable(node);
-            else if (node.Method.Name == "Equals")
+                return node;
+            }
+            if (node.Method.Name == "Equals")
+            {
                 Equal(node);
-            else if (node.Method.Name == "IsNullOrEmpty")
+                return node;
+            }
+            if (node.Method.Name == "IsNullOrEmpty")
+            {
                 IsNullOrEmpty(node);
-            else
-                Like(node);
+                return node;
+            }
 
+            Like(node);
             return node;
+
+        }
+
+        private void SelectResultAnalysis(MethodCallExpression node)
+        {
+            if (node.Method.Name == "Contains")
+            {
+                Visit(node.Arguments[0]);
+                _sqlCmd.AppendFormat(" IN (");
+                var t = ((ConstantExpression)node.Object).Value as IBaseSelectResult;
+                _sqlCmd.Append(t.SqlCmd);
+                _sqlCmd.Append(")");
+
+                Param.AddDynamicParams(t.Param);
+            }
         }
 
         private void DBFunction(MethodCallExpression node)

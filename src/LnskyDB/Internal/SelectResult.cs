@@ -9,12 +9,16 @@ namespace LnskyDB.Internal
     {
         public string SqlCmd { get; set; }
         public string CountSqlCmd { get; set; }
-        public DynamicParameters Param { get; set; } 
-        public SelectResult(string sqlCmd, string countSqlCmd, DynamicParameters param )
+        public DynamicParameters Param { get; set; }
+        public SelectResult(string sqlCmd, string countSqlCmd, DynamicParameters param)
         {
             SqlCmd = sqlCmd;
             CountSqlCmd = countSqlCmd;
             Param = param;
+        }
+        public bool Contains(T v)
+        {
+            throw new NotSupportedException("该方法不可直接调用");
         }
     }
 }
