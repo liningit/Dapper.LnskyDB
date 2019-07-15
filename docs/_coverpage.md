@@ -1,6 +1,6 @@
 
 
-# LnskyDB <small>1.0.0</small>
+# LnskyDB
 
 > 基于Dapper的Lambda扩展.支持分库分表
 
