@@ -48,7 +48,10 @@ namespace LnskyDB.Demo.Entity.<#=tableInfo.TablePre #>
         public override string GetDBModel_DBName() => "<#= tableInfo.DatabaseName #>{0}";
 		<#if (tableInfo.ShuffledConfig != null)
         {#>
-
+		/// <summary>
+        /// 是否分库分表
+        /// </summary>
+		public override bool GetDBModel_IsShuffled() => true;
 		/// <summary>
         /// 最小分库分表时间
         /// </summary>

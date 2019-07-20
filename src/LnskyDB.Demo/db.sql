@@ -135,6 +135,46 @@ EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'∫⁄√˚µ•' , @lev
 GO
 
 
+/****** Object:  Table [dbo].[Data_Shop]    Script Date: 2019/7/15 16:07:14 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Data_Shop](
+	[SysNo] [uniqueidentifier] NOT NULL,
+	[ShopCode] [nvarchar](50) NULL,
+	[ShopName] [nvarchar](50) NOT NULL,
+	[ShopType] [int] NULL,
+ CONSTRAINT [PK_Data_Shop3] PRIMARY KEY CLUSTERED 
+(
+	[SysNo] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY],
+ CONSTRAINT [IX_Data_Shop] UNIQUE NONCLUSTERED 
+(
+	[ShopCode] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[Data_Shop] ADD  CONSTRAINT [DF_Data_Shop3_SysNo]  DEFAULT (newid()) FOR [SysNo]
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'œµÕ≥±‡∫≈' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Data_Shop', @level2type=N'COLUMN',@level2name=N'SysNo'
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'µÍ∆Ã±‡¬Î' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Data_Shop', @level2type=N'COLUMN',@level2name=N'ShopCode'
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'µÍ∆Ã√˚≥∆' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Data_Shop', @level2type=N'COLUMN',@level2name=N'ShopName'
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'µÍ∆Ã¿‡–Õ' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'Data_Shop', @level2type=N'COLUMN',@level2name=N'ShopType'
+GO
+
+
+
 
 USE [Lnsky_Test_19]
 GO

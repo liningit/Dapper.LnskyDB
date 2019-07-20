@@ -25,6 +25,7 @@ namespace LnskyDB.Model
         /// 自增列
         /// </summary>
         public virtual string GetDBModel_IncrementCol() => string.Empty;
+        public virtual bool GetDBModel_IsShuffled() => false;
 
         public virtual void SetIncrementValue(int value)
         {
