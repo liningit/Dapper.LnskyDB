@@ -12,7 +12,10 @@ v1.0.1
 2.Where条件支持Sql函数
 v2.0.0
 1.支持多表联合查询
-2.OrderBy支持表达式及数据库函数</Description>
+2.OrderBy支持表达式及数据库函数
+v2.0.1
+1.支持子查询
+2.基础类增加返回是否分库分表方法</Description>
     <PackageProjectUrl>https://github.com/liningit/LnskyDB/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/liningit/LnskyDB/</RepositoryUrl>
     <RepositoryType>github</RepositoryType>
@@ -20,7 +23,7 @@ v2.0.0
     <PackageReleaseNotes>基于Dapper的Lambda扩展支持按时间分库分表,也可以自定义分库分表方法,且实体类有T4模版自动生成.省去手写实体类的麻烦</PackageReleaseNotes>
     <PackageLicenseUrl>https://licenses.nuget.org/MIT</PackageLicenseUrl>
     <Copyright></Copyright>
-    <Version>2.0.0</Version>
+    <Version>2.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
