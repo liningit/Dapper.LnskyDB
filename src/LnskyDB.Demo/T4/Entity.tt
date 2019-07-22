@@ -46,8 +46,11 @@ namespace LnskyDB.Demo.Entity.<#=tableInfo.TablePre #>
 
         public override string GetDBModel_TableName() => "<#=tableInfo.DBModel_TableName #>{0}";
         public override string GetDBModel_DBName() => "<#= tableInfo.DatabaseName #>{0}";
-		<#if (tableInfo.ShuffledConfig != null)
-        {#>
+				<#if (tableInfo.ShuffledConfig != null)
+        {		   
+		   var shuffledDataCol=  tableInfo.Columns.Where(m => m.ColumnName==tableInfo.ShuffledConfig.ShuffledData).FirstOrDefault();
+		#>
+
 		/// <summary>
         /// 是否分库分表
         /// </summary>
@@ -72,7 +75,8 @@ namespace LnskyDB.Demo.Entity.<#=tableInfo.TablePre #>
         DateTime _DBModel_ShuffledTempDate;
 
         [JsonIgnore]
-        public DateTime DBModel_ShuffledTempDate { get { return <#= tableInfo.ShuffledConfig.ShuffledData#> != DateTime.MinValue ? <#= tableInfo.ShuffledConfig.ShuffledData#> : _DBModel_ShuffledTempDate; } set { _DBModel_ShuffledTempDate = value; } }
+        public DateTime DBModel_ShuffledTempDate { get { return <#= tableInfo.ShuffledConfig.ShuffledData#> != DateTime.MinValue ? <#= tableInfo.ShuffledConfig.ShuffledData#><#= shuffledDataCol.IsNullable?" ?? _DBModel_ShuffledTempDate":""
+		#> : _DBModel_ShuffledTempDate; } set { _DBModel_ShuffledTempDate = value; } }
 
         public override void SetShuffledData(object obj) { DBModel_ShuffledTempDate = (DateTime)obj; }
 		<#}#>

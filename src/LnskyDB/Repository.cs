@@ -28,10 +28,6 @@ namespace LnskyDB
             if (obj == null)
             {
                 obj = dbModel;
-                if (obj.GetShuffledModel() != ShuffledModel.Empty)
-                {
-                    throw new NoShuffledException(obj.GetDBModel_TableName(), "分库分表对象");
-                }
             }
             return DBTool.GetConnection(obj.GetDBModel_DBName(), obj.GetShuffledModel());
 
