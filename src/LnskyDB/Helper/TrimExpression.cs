@@ -81,24 +81,21 @@ namespace LnskyDB.Helper
                     _isDeep = true;
                     if (b.Left.NodeType != b.Right.NodeType)
                     {
-                        if (b.Left.NodeType == ExpressionType.MemberAccess && b.Left.Type.Name == "Boolean")
+                        if ((b.Left.NodeType == ExpressionType.MemberAccess || b.Left.NodeType == ExpressionType.Constant) && b.Left.Type.Name == "Boolean")
                         {
                             if (expression.NodeType == ExpressionType.AndAlso)
                                 return Expression.AndAlso(Expression.Equal(b.Left, Expression.Constant(true)), b.Right);
                             if (expression.NodeType == ExpressionType.OrElse)
                                 return Expression.OrElse(Expression.Equal(b.Left, Expression.Constant(true)), b.Right);
                         }
-                        if (b.Right.NodeType == ExpressionType.MemberAccess && b.Right.Type.Name == "Boolean")
+                        if ((b.Right.NodeType == ExpressionType.MemberAccess || b.Right.NodeType == ExpressionType.Constant) && b.Right.Type.Name == "Boolean")
                         {
                             if (expression.NodeType == ExpressionType.AndAlso)
                                 return Expression.AndAlso(b.Left, Expression.Equal(b.Right, Expression.Constant(true)));
                             if (expression.NodeType == ExpressionType.OrElse)
                                 return Expression.OrElse(b.Left, Expression.Equal(b.Right, Expression.Constant(true)));
                         }
-                        if (b.Left.NodeType == ExpressionType.Constant)
-                            return b.Right;
-                        if (b.Right.NodeType == ExpressionType.Constant)
-                            return b.Left;
+                        return b;
                     }
                     break;
                 default:

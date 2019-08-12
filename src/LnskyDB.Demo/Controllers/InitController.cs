@@ -80,8 +80,9 @@ namespace Lnsky.Test.Controllers
                             var tempNS = new ProductSaleByDayNSEntity();
                             tempNS.SysNo = temp.SysNo = Guid.NewGuid();
                             tempNS.DataSource = temp.DataSource = lstDataSource[random.Next(lstDataSource.Count)];
-                            tempNS.ShopID = temp.ShopID = lstShop[random.Next(lstShop.Count)].SysNo;
-
+                            var shop = lstShop[random.Next(lstShop.Count)];
+                            tempNS.ShopID = temp.ShopID = shop.SysNo;
+                            temp.ShopName = shop.ShopName;
                             tempNS.ProductID = temp.ProductID = p.Key;
                             tempNS.OutProductID = temp.OutProductID = p.Value;
                             tempNS.ProductName = temp.ProductName = p.Value;

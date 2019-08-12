@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using LnskyDB.Internal;
+using System.Linq.Expressions;
 
 namespace LnskyDB
 {
@@ -13,7 +14,7 @@ namespace LnskyDB
     {
         public Repository() : base(new T()) { }
     }
-    public abstract class AbstractRepository<T> : IRepository<T> where T : BaseDBModel
+    public abstract class AbstractRepository<T> : IRepository<T> where T : BaseDBModel, new()
     {
         private T dbModel = null;
         internal AbstractRepository(T obj)
@@ -38,7 +39,7 @@ namespace LnskyDB
         }
         public List<R> GetList<R>(IQuery<T> query)
         {
-            return GetConn(query.DBModel).GetList<R, T>(query: query, commandTimeout: CommandTimeout);
+            return GetList(GetConn(query.DBModel).GetList<R, T>(query: query, commandTimeout: CommandTimeout));
         }
         public long Count(IQuery<T> query)
         {
@@ -56,7 +57,7 @@ namespace LnskyDB
         {
             var conn = GetConn(query.DBModel);
             var count = conn.Count(query: query, commandTimeout: CommandTimeout);
-            List<R> lst = count == 0 ? new List<R>() : conn.GetList<R, T>(query: query, commandTimeout: CommandTimeout);
+            List<R> lst = count == 0 ? new List<R>() : GetList(conn.GetList<R, T>(query: query, commandTimeout: CommandTimeout));
             return new Paging<R>(count, lst);
         }
         public T Get(T obj)
@@ -88,12 +89,12 @@ namespace LnskyDB
 
         public List<T> GetList(string sql, object par)
         {
-            return GetConn(null).Query<T>(sql: sql, param: par, commandTimeout: CommandTimeout).AsList();
+            return GetList(GetConn(null).Query<T>(sql: sql, param: par, commandTimeout: CommandTimeout));
         }
 
         public List<R> GetList<R>(string sql, object par)
         {
-            return GetConn(null).Query<R>(sql: sql, param: par, commandTimeout: CommandTimeout).AsList();
+            return GetList(GetConn(null).Query<R>(sql: sql, param: par, commandTimeout: CommandTimeout));
         }
 
         public T Get(string sql, object par)
@@ -113,17 +114,17 @@ namespace LnskyDB
 
         public List<T> GetList(T obj, string sql, object par)
         {
-            return GetConn(obj).Query<T>(sql: sql, param: par, commandTimeout: CommandTimeout).AsList();
+            return GetList(GetConn(obj).Query<T>(sql: sql, param: par, commandTimeout: CommandTimeout));
         }
 
         public List<R> GetList<R>(T obj, string sql, object par)
         {
-            return GetList(GetConn(obj).Query<R>(sql: sql, param: par, commandTimeout: CommandTimeout)).AsList();
+            return GetList(GetConn(obj).Query<R>(sql: sql, param: par, commandTimeout: CommandTimeout));
         }
 
         public List<R> GetList<R>(ISelectResult<R> query)
         {
-            return GetList(GetConn(null).Query<R>(sql: query.SqlCmd, param: query.Param, commandTimeout: CommandTimeout)).AsList();
+            return GetList(GetConn(null).Query<R>(sql: query.SqlCmd, param: query.Param, commandTimeout: CommandTimeout));
         }
         public Paging<R> GetPaging<R>(ISelectResult<R> query)
         {
@@ -132,7 +133,7 @@ namespace LnskyDB
             return new Paging<R>(count, lst);
         }
 
-        private IEnumerable<R> GetList<R>(IEnumerable<R> lst)
+        private List<R> GetList<R>(IEnumerable<R> lst)
         {
             if (typeof(BaseDBModel).IsAssignableFrom(typeof(R)))
             {
@@ -143,7 +144,7 @@ namespace LnskyDB
                     b.BeginChange();
                 }
             }
-            return lst;
+            return lst.AsList();
         }
 
         public T Get(T obj, string sql, object par)
@@ -218,7 +219,10 @@ namespace LnskyDB
             return res.List;
 
         }
-
-
+        public List<T> GetList(Expression<Func<T, bool>> predicate)
+        {
+            var query = QueryFactory.Create(predicate);
+            return GetList(query);
+        }
     }
 }

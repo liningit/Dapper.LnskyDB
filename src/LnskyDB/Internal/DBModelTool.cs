@@ -90,13 +90,13 @@ namespace LnskyDB.Internal
             }
         }
 
-        internal static List<R> GetList<R, T>(this DbConnection conn, IQuery<T> query, int? commandTimeout = null) where T : BaseDBModel
+        internal static IEnumerable<R> GetList<R, T>(this DbConnection conn, IQuery<T> query, int? commandTimeout = null) where T : BaseDBModel
         {
             var sql = new StringBuilder($"SELECT * FROM [{DBTool.GetTableName(query.DBModel)}] WHERE 1=1 ");
             DynamicParameters dynamicParameters = SetWhereSql(query, sql);
             try
             {
-                var lst = conn.Query<R>(sql: sql.ToString(), param: dynamicParameters, commandTimeout: commandTimeout).AsList();
+                var lst = conn.Query<R>(sql: sql.ToString(), param: dynamicParameters, commandTimeout: commandTimeout);
                 return lst;
             }
             catch (Exception e)

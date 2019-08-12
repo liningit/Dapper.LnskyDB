@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using LnskyDB;
 using LnskyDB.Model;
 
@@ -13,6 +14,7 @@ namespace LnskyDB
         bool Delete(T obj);
         int Delete(IQuery<T> where);
         T Get(T obj);
+        List<T> GetList(Expression<Func<T, bool>> predicate);
         List<T> GetList(IQuery<T> query);
         List<T> GetList(IQuery<T> query, DateTime stTime, DateTime endime);
         List<R> GetList<R>(IQuery<T> query);
@@ -20,6 +22,7 @@ namespace LnskyDB
         Paging<T> GetPaging(IQuery<T> query, DateTime stTime, DateTime endime);
 
         Paging<T> GetPaging(IQuery<T> query);
+        Paging<R> GetPaging<R>(IQuery<T> query);
         Paging<R> GetPaging<R>(ISelectResult<R> query);
 
         bool Update(T obj);
