@@ -6,7 +6,7 @@ using System.Text;
 
 namespace LnskyDB.Model
 {
-    public abstract class BaseDBModel
+    public class BaseDBModel
     {
         public BaseDBModel()
         {
@@ -15,7 +15,7 @@ namespace LnskyDB.Model
         /// <summary>
         /// 主键
         /// </summary>
-        public abstract ImmutableList<string> GetDBModel_PKCols();
+        public virtual ImmutableList<string> GetDBModel_PKCols() => null;
         private static ImmutableList<string> _DBModel_ExcludeColsForUpdate = ImmutableList.Create<string>();
         /// <summary>
         /// 更新时忽略的列
@@ -34,12 +34,12 @@ namespace LnskyDB.Model
         /// <summary>
         /// 表名
         /// </summary>
-        public abstract string GetDBModel_TableName();
+        public virtual string GetDBModel_TableName() => null;
         /// <summary>
         /// 数据库名称
         /// </summary>
         /// <returns></returns>
-        public abstract string GetDBModel_DBName();
+        public virtual string GetDBModel_DBName() => null;
         /// <summary>
         /// 获取分库分表信息,如果没有分库分表则可以不重写
         /// </summary>
