@@ -224,5 +224,10 @@ namespace LnskyDB
             var query = QueryFactory.Create(predicate);
             return GetList(query);
         }
+        public List<T> GetList()
+        {
+            var query = QueryFactory.Create<T>();
+            return GetList(query);
+        }
     }
 }

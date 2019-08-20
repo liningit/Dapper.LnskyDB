@@ -14,6 +14,7 @@ namespace LnskyDB
         bool Delete(T obj);
         int Delete(IQuery<T> where);
         T Get(T obj);
+        List<T> GetList();
         List<T> GetList(Expression<Func<T, bool>> predicate);
         List<T> GetList(IQuery<T> query);
         List<T> GetList(IQuery<T> query, DateTime stTime, DateTime endime);
