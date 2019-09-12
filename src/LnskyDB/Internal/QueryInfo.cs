@@ -105,7 +105,7 @@ namespace LnskyDB.Internal
 
         public IJoinQuery<TResult> OuterJoin<TR, TKey, TResult>(IQuery<TR> rightQuery, Expression<Func<T, TKey>> leftKeySelector, Expression<Func<TR, TKey>> rightKeySelector, Expression<Func<T, TR, TResult>> resultSelector) where TR : BaseDBModel, new()
         {
-            return Join("OUTER", rightQuery, leftKeySelector, rightKeySelector, resultSelector);
+            return Join("LEFT OUTER", rightQuery, leftKeySelector, rightKeySelector, resultSelector);
         }
         public IJoinQuery<TResult> InnerJoin<TR, TKey, TResult>(IQuery<TR> rightQuery, Expression<Func<T, TKey>> leftKeySelector, Expression<Func<TR, TKey>> rightKeySelector, Expression<Func<T, TR, TResult>> resultSelector) where TR : BaseDBModel, new()
         {
