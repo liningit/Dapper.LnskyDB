@@ -44,7 +44,7 @@ namespace LnskyDB.Expressions
             }
             _tempFieldName = "PJW_" + GetHashCode() + "_";
 
-            var exp = TrimExpression.Trim(expression);
+            var exp = TrimExpression.Trim(expression,true);
             Visit(exp);
         }
         #endregion

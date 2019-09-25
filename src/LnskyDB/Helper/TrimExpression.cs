@@ -7,11 +7,16 @@ namespace LnskyDB.Helper
 {
     internal class TrimExpression : ExpressionVisitor
     {
-        private bool _isDeep;
-
-        public static Expression Trim(Expression expression)
+        private TrimExpression(bool isWhere)
         {
-            return new TrimExpression().Visit(expression);
+            _isWhere = isWhere;
+        }
+        private bool _isDeep;
+        private bool _isWhere;
+
+        public static Expression Trim(Expression expression, bool isWhere)
+        {
+            return new TrimExpression(isWhere).Visit(expression);
         }
 
         private Expression Sub(Expression expression)
@@ -35,8 +40,9 @@ namespace LnskyDB.Helper
                     else
                     {
                         if (_isDeep)
+                        {
                             return expression;
-
+                        }
                         _isDeep = true;
                         return Expression.Equal(expression, Expression.Constant(true));
                     }
@@ -98,6 +104,17 @@ namespace LnskyDB.Helper
                         return b;
                     }
                     break;
+                case ExpressionType.Lambda:
+                    _isDeep = true;
+                    var l = (LambdaExpression)expression;
+                    if (_isWhere)
+                    {
+                        if ((l.Body.NodeType == ExpressionType.MemberAccess || l.Body.NodeType == ExpressionType.Constant) && l.Body.Type.Name == "Boolean")
+                        {
+                            return Expression.Equal(l.Body, Expression.Constant(true));
+                        }
+                    }
+                    return expression;
                 default:
                     _isDeep = true;
                     return expression;

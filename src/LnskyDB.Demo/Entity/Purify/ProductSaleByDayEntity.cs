@@ -12,7 +12,11 @@ namespace LnskyDB.Demo.Entity.Purify
 		
         public override string GetDBModel_TableName() => "Purify_ProductSaleByDay{0}";
         public override string GetDBModel_DBName() => "Lnsky{0}";
-		
+				
+		/// <summary>
+        /// 是否分库分表
+        /// </summary>
+		public override bool GetDBModel_IsShuffled() => true;
 		/// <summary>
         /// 最小分库分表时间
         /// </summary>

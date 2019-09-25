@@ -1,6 +1,7 @@
 ﻿
 using LnskyDB.Demo.Entity.Data;
 using LnskyDB.Demo.Entity.Purify;
+using LnskyDB.Demo.Repository.Data;
 using LnskyDB.Demo.Repository.Purify;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -44,7 +45,13 @@ namespace LnskyDB.Demo.Controllers
             }
             return entity;
         }
+        [HttpGet]
+        public ActionResult<List<ShopEntity>> GetShopList()
+        {
 
+            var lst = new ShopRepository().GetList(m => m.ShopName == "测试店铺0" && m.IsDelete == true);
+            return lst;
+        }
         // GET http://localhost:53277/ProductSaleByDayNS/GetList
         [HttpGet]
         public ActionResult<List<ProductSaleByDayNSEntity>> GetList()
@@ -52,7 +59,7 @@ namespace LnskyDB.Demo.Controllers
 
             var repository = GetRepository();
 
-            var lst = repository.GetList(m => true&&m.Sales >= 0 && m.DataSource != "");
+            var lst = repository.GetList(m => true && m.Sales >= 0 && m.DataSource != "");
 
             return lst;
         }

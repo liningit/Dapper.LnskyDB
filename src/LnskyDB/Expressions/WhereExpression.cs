@@ -15,8 +15,8 @@ namespace LnskyDB.Expressions
         /// <summary>
         /// sql指令
         /// </summary>
-        public  string SqlCmd => _sqlCmd.Length > 0 ? $" AND {_sqlCmd} " : "";    
- 
+        public string SqlCmd => _sqlCmd.Length > 0 ? $" AND {_sqlCmd} " : "";
+
         private readonly string _tableAlias;
         #endregion
         #region 执行解析
@@ -29,15 +29,15 @@ namespace LnskyDB.Expressions
         /// <param name="prefix">字段前缀</param>
         /// <param name="providerOption"></param>
         /// <returns></returns>
-        public WhereExpression(LambdaExpression expression,  string tableAlias, DynamicParameters para) : base(para)
+        public WhereExpression(LambdaExpression expression, string tableAlias, DynamicParameters para) : base(para)
         {
-            _tempFieldName = "P_" + tableAlias + GetHashCode() + "_";     
-   
+            _tempFieldName = "P_" + tableAlias + GetHashCode() + "_";
+
             if (!string.IsNullOrEmpty(tableAlias))
             {
                 _tableAlias = tableAlias + ".";
             }
-            var exp = TrimExpression.Trim(expression);
+            var exp = TrimExpression.Trim(expression, true);
             Visit(exp);
         }
         #endregion

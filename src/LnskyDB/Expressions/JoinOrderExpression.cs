@@ -23,7 +23,7 @@ namespace LnskyDB.Expressions
                 _map.Add(key, v.Value);
             }
 
-            var exp = TrimExpression.Trim(expression);
+            var exp = TrimExpression.Trim(expression, false);
             Visit(exp);
         }
         /// <inheritdoc />

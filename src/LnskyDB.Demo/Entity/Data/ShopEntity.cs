@@ -12,7 +12,7 @@ namespace LnskyDB.Demo.Entity.Data
 		
         public override string GetDBModel_TableName() => "Data_Shop{0}";
         public override string GetDBModel_DBName() => "LnskyNS{0}";
-		
+				
 		#region Model
 		
 		Guid _SysNo;
@@ -38,6 +38,12 @@ namespace LnskyDB.Demo.Entity.Data
 		/// 店铺类型
 		/// </summary>		
 		public int? ShopType { get { return _ShopType; } set { Change("ShopType"); _ShopType = value; } }
+		
+		bool _IsDelete;
+		/// <summary>
+		/// 
+		/// </summary>		
+		public bool IsDelete { get { return _IsDelete; } set { Change("IsDelete"); _IsDelete = value; } }
 		
 		#endregion Model
 	}

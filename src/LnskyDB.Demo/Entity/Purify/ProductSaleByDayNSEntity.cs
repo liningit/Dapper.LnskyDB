@@ -12,7 +12,7 @@ namespace LnskyDB.Demo.Entity.Purify
 		
         public override string GetDBModel_TableName() => "Purify_ProductSaleByDayNS{0}";
         public override string GetDBModel_DBName() => "LnskyNS{0}";
-		
+				
 		#region Model
 		
 		Guid _SysNo;
