@@ -49,7 +49,7 @@ namespace LnskyDB.Demo.Controllers
         public ActionResult<List<ShopEntity>> GetShopList()
         {
 
-            var lst = new ShopRepository().GetList(m => m.ShopName == "测试店铺0" && m.IsDelete == true);
+            var lst = new ShopRepository().GetList(m => m.ShopName == null && m.IsDelete == true);
             return lst;
         }
         // GET http://localhost:53277/ProductSaleByDayNS/GetList
