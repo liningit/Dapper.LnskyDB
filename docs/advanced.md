@@ -7,7 +7,9 @@ var query = QueryFactory.Create<ProductSaleByDayNSEntity>(m => DBFunction.Functi
 ```
 
 ## 自定义分库分表
-只需修改实体类里面的'public override ShuffledModel GetShuffledModel()'方法即可,如下是不分库按年月分表:
+只需修改实体类里面的'public override ShuffledModel GetShuffledModel()'方法返回'ShuffledModel'即可.
+ShuffledModel包含两个属性分表表示分库分表
+如下是不分库按年月分表:
 ```csharp
 	public override ShuffledModel GetShuffledModel()
         {

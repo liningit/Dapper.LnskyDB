@@ -8,7 +8,13 @@
             DBId = dbId;
             TableId = tableId;
         }
+        /// <summary>
+        /// 分库id
+        /// </summary>
         public string DBId { get; private set; }
+        /// <summary>
+        /// 分表id
+        /// </summary>
         public string TableId { get; private set; }
         public bool IsEmpty()
         {
