@@ -31,6 +31,15 @@ namespace LnskyDB.Model
         {
             throw new Exception("该表没有自增列");
         }
+        private string _tableWith = string.Empty;
+        public string GetTableWith()
+        {
+            return _tableWith;
+        }
+        public void SetTableWith(string tableWith)
+        {
+            this._tableWith = tableWith;
+        }
         /// <summary>
         /// 表名
         /// </summary>

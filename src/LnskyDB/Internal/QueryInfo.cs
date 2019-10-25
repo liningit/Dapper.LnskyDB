@@ -15,13 +15,19 @@ namespace LnskyDB.Internal
     {
         public long StarSize { get; set; }
         public int Rows { get; set; }
+        public string TableWith { get { return DBModel.GetTableWith(); } set { DBModel.SetTableWith(value); } }
         public T DBModel { get; private set; }
         internal QueryInfo(T model)
         {
             DBModel = model;
+            if (DBModel == null)
+            {
+                DBModel = new T();
+            }
         }
         public List<OrderCriteria> OrderbyList { get; private set; } = new List<OrderCriteria>();
         public LambdaExpression WhereExpression { get; private set; }
+
 
         public IQuery<T> And(Expression<Func<T, bool>> predicate)
         {
@@ -131,7 +137,7 @@ namespace LnskyDB.Internal
                 sqlJoin.Append(right.JoinDic[v.Key]);
                 sqlJoin.Append(")");
             }
-            var joinStr = $"{DBTool.GetTableName(DBModel)} t1 {type} JOIN {DBTool.GetTableName(rightQuery.DBModel)} t2 ON {sqlJoin}";
+            var joinStr = $"{DBTool.GetTableName(DBModel)} t1 {DBTool.GetTableWith(this)} {type} JOIN {DBTool.GetTableName(rightQuery.DBModel)} t2  {DBTool.GetTableWith(rightQuery)} ON {sqlJoin}";
 
             var sel = new JoinResultMapExpression(resultSelector, new Dictionary<string, string> { { "", "t1" } }, "t2", dynamicParameters);
             StringBuilder sqlWhere = new StringBuilder();
@@ -158,8 +164,8 @@ namespace LnskyDB.Internal
             var dynamicParameters = new DynamicParameters();
             var selExp = new JoinSelectExpression(sel, new Dictionary<string, string> { { "", "[jtmp]" } }, dynamicParameters);
             var selSql = string.Join(",", selExp.QueryColumns).Replace("[jtmp].", "");
-            var sql = new StringBuilder($"SELECT {selSql} FROM {DBTool.GetTableName(this.DBModel)} WHERE 1=1");
-            var countSql = new StringBuilder($"SELECT COUNT(1) FROM {DBTool.GetTableName(this.DBModel)} WHERE 1=1");
+            var sql = new StringBuilder($"SELECT {selSql} FROM {DBTool.GetTableName(this.DBModel)} {DBTool.GetTableWith(this)} WHERE 1=1");
+            var countSql = new StringBuilder($"SELECT COUNT(1) FROM {DBTool.GetTableName(this.DBModel)} {DBTool.GetTableWith(this)} WHERE 1=1");
 
             var whereExp = new WhereExpression(WhereExpression, "", dynamicParameters);
             sql.Append(whereExp.SqlCmd);

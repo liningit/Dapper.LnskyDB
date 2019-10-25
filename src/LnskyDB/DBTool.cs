@@ -130,8 +130,18 @@ namespace LnskyDB
             return conn;
         }
 
-
-
+        public static string GetTableWith(BaseDBModel dBModel)
+        {
+            if (string.IsNullOrEmpty(dBModel.GetTableWith()))
+            {
+                return string.Empty;
+            }
+            return $" with({dBModel.GetTableWith()}) ";
+        }
+        public static string GetTableWith<T>(IQuery<T> query) where T : BaseDBModel
+        {
+            return GetTableWith(query.DBModel);
+        }
         public static string GetTableName(BaseDBModel model)
         {
             return string.Format(model.GetDBModel_TableName(), model.GetShuffledModel().TableId);
@@ -189,5 +199,5 @@ namespace LnskyDB
             return false;
         }
     }
- 
+
 }

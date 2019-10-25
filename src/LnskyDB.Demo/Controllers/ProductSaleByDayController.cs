@@ -41,6 +41,7 @@ namespace LnskyDB.Demo.Controllers
                 DBModel_ShuffledTempDate = new DateTime(2019, 01, 01),//这儿表示差19年1月的库和表
                 SysNo = sysNo
             });
+         
             if (entity == null)
             {
                 return new ProductSaleByDayEntity();

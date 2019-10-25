@@ -61,7 +61,7 @@ namespace LnskyDB.Internal
 
         internal static long Count<T>(this DbConnection conn, IQuery<T> query, int? commandTimeout = null) where T : BaseDBModel
         {
-            var sql = new StringBuilder($"SELECT COUNT(1) FROM [{DBTool.GetTableName(query.DBModel)}] WHERE 1=1 ");
+            var sql = new StringBuilder($"SELECT COUNT(1) FROM [{DBTool.GetTableName(query.DBModel)}]  {DBTool.GetTableWith(query)}  WHERE 1=1 ");
             DynamicParameters dynamicParameters = SetWhereSql(query, sql, true);
             try
             {
@@ -75,7 +75,7 @@ namespace LnskyDB.Internal
         }
         internal static List<T> GetList<T>(this DbConnection conn, IQuery<T> query, int? commandTimeout = null) where T : BaseDBModel
         {
-            var sql = new StringBuilder($"SELECT * FROM [{DBTool.GetTableName(query.DBModel)}] WHERE 1=1 ");
+            var sql = new StringBuilder($"SELECT * FROM [{DBTool.GetTableName(query.DBModel)}] {DBTool.GetTableWith(query)} WHERE 1=1 ");
             DynamicParameters dynamicParameters = SetWhereSql(query, sql);
             try
             {
@@ -92,7 +92,7 @@ namespace LnskyDB.Internal
 
         internal static IEnumerable<R> GetList<R, T>(this DbConnection conn, IQuery<T> query, int? commandTimeout = null) where T : BaseDBModel
         {
-            var sql = new StringBuilder($"SELECT * FROM [{DBTool.GetTableName(query.DBModel)}] WHERE 1=1 ");
+            var sql = new StringBuilder($"SELECT * FROM [{DBTool.GetTableName(query.DBModel)}]  {DBTool.GetTableWith(query)}  WHERE 1=1 ");
             DynamicParameters dynamicParameters = SetWhereSql(query, sql);
             try
             {
@@ -111,7 +111,7 @@ namespace LnskyDB.Internal
             {
                 throw new Exception("没有筛选条件");
             }
-            var sql = $"SELECT * FROM [{DBTool.GetTableName(obj)}] WHERE " + GetSql(obj.GetDBModel_ChangeList(), "AND");
+            var sql = $"SELECT * FROM [{DBTool.GetTableName(obj)}] {DBTool.GetTableWith(obj)} WHERE " + GetSql(obj.GetDBModel_ChangeList(), "AND");
             try
             {
                 var res = conn.QueryFirstOrDefault<T>(sql: sql, param: obj, commandTimeout: commandTimeout);

@@ -12,6 +12,8 @@ namespace LnskyDB
 
         long StarSize { get; set; }
         int Rows { get; set; }
+        //
+        string TableWith { get; set; }
         List<OrderCriteria> OrderbyList { get; }
         LambdaExpression WhereExpression { get; }
         T DBModel { get; }
