@@ -73,6 +73,11 @@ namespace LnskyDB
         {
             return GetConn(obj).Update(obj: obj, where: where, commandTimeout: CommandTimeout);
         }
+        public int Update(T obj, Expression<Func<T, bool>> predicate)
+        {
+            var where = QueryFactory.Create(predicate);
+            return Update(obj, where);
+        }
         public bool Delete(T obj)
         {
             return GetConn(obj).Delete(obj: obj, commandTimeout: CommandTimeout);
@@ -80,6 +85,11 @@ namespace LnskyDB
         public int Delete(IQuery<T> where)
         {
             return GetConn(where.DBModel).Delete(where: where, commandTimeout: CommandTimeout);
+        }
+        public int Delete(Expression<Func<T, bool>> predicate)
+        {
+            var where = QueryFactory.Create(predicate);
+            return Delete(where);
         }
         public void Add(T obj)
         {
@@ -229,5 +239,9 @@ namespace LnskyDB
             var query = QueryFactory.Create<T>();
             return GetList(query);
         }
+
+
+
+
     }
 }
