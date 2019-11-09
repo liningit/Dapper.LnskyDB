@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using LnskyDB.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,6 +10,7 @@ namespace LnskyDB
     {
         string SqlCmd { get; set; }
         string CountSqlCmd { get; set; }
+        BaseDBModel DBModel { get; set; }
         DynamicParameters Param { get; set; }
     }
     public interface ISelectResult<T> : IBaseSelectResult

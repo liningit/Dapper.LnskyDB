@@ -158,7 +158,7 @@ namespace LnskyDB.Internal
             return new JoinQueryInfo<TResult>(joinStr, 2, sel.MapList, sqlWhere.ToString(), dynamicParameters);
         }
 
-        public ISelectResult<TResult> Select<TResult>(Expression<Func<T, TResult>> sel) where TResult : new()
+        public ISelectResult<TResult> Select<TResult>(Expression<Func<T, TResult>> sel)
         {
 
             var dynamicParameters = new DynamicParameters();
@@ -191,7 +191,9 @@ namespace LnskyDB.Internal
 
                 }
             }
-            return new SelectResult<TResult>(sql.ToString(), countSql.ToString(), dynamicParameters);
+            var sr = new SelectResult<TResult>(sql.ToString(), countSql.ToString(), dynamicParameters);
+            sr.DBModel = DBModel;
+            return sr;
         }
     }
 }

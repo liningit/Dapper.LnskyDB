@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Dapper;
+using LnskyDB.Model;
 
 namespace LnskyDB.Internal
 {
@@ -10,6 +11,8 @@ namespace LnskyDB.Internal
         public string SqlCmd { get; set; }
         public string CountSqlCmd { get; set; }
         public DynamicParameters Param { get; set; }
+        public BaseDBModel DBModel { get; set; }
+
         public SelectResult(string sqlCmd, string countSqlCmd, DynamicParameters param)
         {
             SqlCmd = sqlCmd;

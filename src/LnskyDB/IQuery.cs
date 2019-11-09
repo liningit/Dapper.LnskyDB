@@ -36,6 +36,6 @@ namespace LnskyDB
         /// </summary>
         IJoinQuery<TResult> InnerJoin<TR, TKey, TResult>(IQuery<TR> inner, Expression<Func<T, TKey>> outerKeySelector, Expression<Func<TR, TKey>> innerKeySelector, Expression<Func<T, TR, TResult>> resultSelector) where TR : BaseDBModel, new();
 
-        ISelectResult<TResult> Select<TResult>(Expression<Func<T, TResult>> sel) where TResult : new();
+        ISelectResult<TResult> Select<TResult>(Expression<Func<T, TResult>> sel) ;
     }
 }

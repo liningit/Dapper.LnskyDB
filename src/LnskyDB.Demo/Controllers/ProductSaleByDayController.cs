@@ -41,7 +41,7 @@ namespace LnskyDB.Demo.Controllers
                 DBModel_ShuffledTempDate = new DateTime(2019, 01, 01),//这儿表示差19年1月的库和表
                 SysNo = sysNo
             });
-         
+
             if (entity == null)
             {
                 return new ProductSaleByDayEntity();
@@ -51,7 +51,7 @@ namespace LnskyDB.Demo.Controllers
 
         // GET http://localhost:53277/ProductSaleByDay/GetList
         [HttpGet]
-        public ActionResult<List<ProductSaleByDayEntity>> GetList()
+        public ActionResult<object> GetList()
         {
 
             var stTime = new DateTime(2019, 1, 15);
@@ -64,9 +64,9 @@ namespace LnskyDB.Demo.Controllers
             query.OrderByDescing(m => m.StatisticalDate);
             query.StarSize = 20;
             query.Rows = 10;
+            var q2 = query.Select(m => new ProductSaleByDayEntity { SysNo=m.SysNo, BrandID=m.BrandID });
             //分库的传入stTime,endTime会自动根据时间查询符合条件的库和表
-            var lst = repository.GetList(query);
-
+            var lst = repository.GetList(q2);
             return lst;
         }
         //GET http://localhost:53277/ProductSaleByDay/GetPaging

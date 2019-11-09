@@ -7,6 +7,9 @@ using System.Collections.Generic;
 using System.Data.Common;
 using LnskyDB.Internal;
 using System.Linq.Expressions;
+using System.Reflection;
+using System.Linq;
+using System.Data;
 
 namespace LnskyDB
 {
@@ -132,13 +135,14 @@ namespace LnskyDB
             return GetList(GetConn(obj).Query<R>(sql: sql, param: par, commandTimeout: CommandTimeout));
         }
 
-        public List<R> GetList<R>(ISelectResult<R> query)
+        public List<R> GetList<R>(ISelectResult<R> query) where R : new()
         {
-            return GetList(GetConn(null).Query<R>(sql: query.SqlCmd, param: query.Param, commandTimeout: CommandTimeout));
+            return GetList(GetConn(query.DBModel as T).Query<R>(sql: query.SqlCmd, param: query.Param, commandTimeout: CommandTimeout));
         }
-        public Paging<R> GetPaging<R>(ISelectResult<R> query)
+        public Paging<R> GetPaging<R>(ISelectResult<R> query) where R : new()
         {
-            var lst = GetList(GetConn(null).Query<R>(sql: query.SqlCmd, param: query.Param, commandTimeout: CommandTimeout));
+
+            var lst = GetList(query);
             var count = GetConn(null).QuerySingleOrDefault<long>(sql: query.CountSqlCmd, param: query.Param, commandTimeout: CommandTimeout);
             return new Paging<R>(count, lst);
         }
