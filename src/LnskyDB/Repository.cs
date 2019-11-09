@@ -176,7 +176,7 @@ namespace LnskyDB
             return GetConn(obj).Execute(sql: sql, param: par, commandTimeout: CommandTimeout);
         }
 
-        public Paging<T> GetPaging(IQuery<T> query, DateTime stTime, DateTime endime)
+        public virtual Paging<T> GetPaging(IQuery<T> query, DateTime stTime, DateTime endime)
         {
             var res = GetList(query, stTime, endime, true);
             return new Paging<T>(res.TotalCount, res.List);
@@ -227,7 +227,7 @@ namespace LnskyDB
             return (res, totalCount);
         }
 
-        public List<T> GetList(IQuery<T> query, DateTime stTime, DateTime endime)
+        public virtual List<T> GetList(IQuery<T> query, DateTime stTime, DateTime endime)
         {
             var res = GetList(query, stTime, endime, false);
             return res.List;
