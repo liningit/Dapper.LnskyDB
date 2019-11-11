@@ -28,7 +28,11 @@ GetList增加无参数接口
 v2.0.6
 OuterJoin bug修复
 v2.0.7
-加入对with()关键字的支持</Description>
+加入对with()关键字的支持
+v2.0.7
+Select支持匿名对象
+
+</Description>
     <PackageProjectUrl>https://github.com/liningit/LnskyDB/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/liningit/LnskyDB/</RepositoryUrl>
     <RepositoryType>github</RepositoryType>
