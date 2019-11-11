@@ -135,11 +135,20 @@ namespace LnskyDB
             return GetList(GetConn(obj).Query<R>(sql: sql, param: par, commandTimeout: CommandTimeout));
         }
 
-        public List<R> GetList<R>(ISelectResult<R> query) where R : new()
+        public List<R> GetList<R>(ISelectResult<R> query) 
         {
+            Type typeFromHandle = typeof(R);
+            ConstructorInfo right = typeFromHandle.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).FirstOrDefault((ConstructorInfo x) => x.GetParameters().Length == 0);
+            if (null == right && typeFromHandle.FullName.Contains("AnonymousType"))
+            {
+                using (IDataReader reader = GetConn(query.DBModel as T).ExecuteReader(sql: query.SqlCmd, param: query.Param, commandTimeout: CommandTimeout))
+                {
+                    return GetList(reader.Parse<R>().ToList());
+                }
+            }
             return GetList(GetConn(query.DBModel as T).Query<R>(sql: query.SqlCmd, param: query.Param, commandTimeout: CommandTimeout));
         }
-        public Paging<R> GetPaging<R>(ISelectResult<R> query) where R : new()
+        public Paging<R> GetPaging<R>(ISelectResult<R> query)
         {
 
             var lst = GetList(query);

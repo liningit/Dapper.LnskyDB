@@ -104,7 +104,7 @@ namespace LnskyDB.Internal
 
             return new JoinQueryInfo<TResult>(joinStr, JoinTableCount + 1, sel.MapList, sqlWhere.ToString(), dynamicParameters);
         }
-        public ISelectResult<TResult> Select<TResult>(Expression<Func<T, TResult>> select, bool firstTableSelectAll = false) where TResult : new()
+        public ISelectResult<TResult> Select<TResult>(Expression<Func<T, TResult>> select, bool firstTableSelectAll = false)
         {
             var p = new DynamicParameters();
             p.AddDynamicParams(Param);

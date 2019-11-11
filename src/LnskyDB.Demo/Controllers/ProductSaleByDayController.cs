@@ -58,13 +58,9 @@ namespace LnskyDB.Demo.Controllers
             var endTime = new DateTime(2019, 2, 11);
             var repository = GetRepository();
             var query = QueryFactory.Create<ProductSaleByDayEntity>(m => m.ShopName.Contains("测试"));
-            query.And(m => m.StatisticalDate >= stTime);
-            query.And(m => m.StatisticalDate < endTime.Date.AddDays(1));
+   
             query.DBModel.DBModel_ShuffledTempDate = new DateTime(2019, 01, 01);//这儿表示查19年1月的库和表
-            query.OrderByDescing(m => m.StatisticalDate);
-            query.StarSize = 20;
-            query.Rows = 10;
-            var q2 = query.Select(m => new ProductSaleByDayEntity { SysNo=m.SysNo, BrandID=m.BrandID });
+            var q2 = query.Select(m => new ProductSaleByDayEntity { SysNo = m.SysNo, BrandID = m.BrandID });
             //分库的传入stTime,endTime会自动根据时间查询符合条件的库和表
             var lst = repository.GetList(q2);
             return lst;

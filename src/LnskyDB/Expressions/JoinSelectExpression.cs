@@ -15,7 +15,7 @@ namespace LnskyDB.Expressions
         public List<string> QueryColumns = new List<string>();
 
         Dictionary<string, string> _map = new Dictionary<string, string>();
- 
+
         public JoinSelectExpression(LambdaExpression expression, Dictionary<string, string> map, DynamicParameters para) : base(para)
         {
             foreach (var v in map)
@@ -49,7 +49,19 @@ namespace LnskyDB.Expressions
                 var m = node.Bindings[i] as MemberAssignment;
                 Visit(m.Expression);
                 QueryColumns.Add(_sqlCmd.ToString() + " " + node.Bindings[i].Member.Name);
-                _sqlCmd.Clear(); 
+                _sqlCmd.Clear();
+            }
+            return node;
+        }
+        protected override Expression VisitNew(NewExpression node)
+        {
+            for (int i = 0; i < node.Arguments.Count; i++)
+            {
+                Visit(node.Arguments[i]);
+                var t = node.Arguments[i] as MemberExpression;
+
+                QueryColumns.Add(_sqlCmd.ToString() + " " + node.Members[i].Name);
+                _sqlCmd.Clear();
             }
             return node;
         }

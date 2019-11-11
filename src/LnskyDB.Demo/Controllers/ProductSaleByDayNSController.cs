@@ -184,26 +184,20 @@ namespace LnskyDB.Demo.Controllers
         }
         //GET http://localhost:53277/ProductSaleByDayNS/GetJoinPaging
         [HttpGet]
-        public ActionResult<Paging<ProductSaleByDayNSEntity>> GetJoinPaging()
+        public ActionResult<object> GetJoinPaging()
         {
             var repository = GetRepository();
             var query = QueryFactory.Create<ProductSaleByDayNSEntity>(m => DBFunction.Function<DateTime>("ISNULL", m.UpdateDate, DateTime.Now) > new DateTime(2019, 6, 26));
             var jq = query.InnerJoin(QueryFactory.Create<ShopEntity>(), m => m.ShopID, m => m.SysNo, (x, y) => new { Sale = x, Shop = y });
             jq.And(m => m.Shop.ShopName.Contains("店铺"));
-            jq.OrderByDescing(m => m.Sale.Sales + 1);
-            jq.OrderBy(m => m.Sale.ProductName + m.Sale.OutProductID);
+        
             jq.StarSize = 10;
-            jq.Rows = 5;
-            var res = jq.Select(m => m.Sale);
-            var paging = repository.GetPaging(res);
+            jq.Rows = 5; 
             //也可以下面这样返回dto.第二个参数表示第一个表是否要查询所有列.
-            var res2 = jq.Select(m => new PSDto { ShopName = m.Shop.ShopName }, true);
+            var res2 = jq.Select(m => new  { SysNo = m.Sale.SysNo, BrandID = m.Sale.BrandID }, false);
             var paging2 = repository.GetPaging(res2);
-            var res3 = jq.Select(m => m.Sale.AveragePrice);
-            var paging3 = repository.GetPaging(res3);
-            var count = paging.TotalCount;
-            var lst = paging.ToList();//或者paging.Items
-            return paging;
+    
+            return paging2;
         }
         //GET http://localhost:53277/ProductSaleByDayNS/GetJoinPaging2
         [HttpGet]
