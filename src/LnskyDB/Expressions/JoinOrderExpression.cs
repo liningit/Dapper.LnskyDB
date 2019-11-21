@@ -13,7 +13,7 @@ namespace LnskyDB.Expressions
 
 
         public string SqlCmd => _sqlCmd.Length > 0 ? $" {_sqlCmd} " : "";
-        public JoinOrderExpression(LambdaExpression expression, Dictionary<string, string> m, DynamicParameters para) : base(para)
+        public JoinOrderExpression(LambdaExpression expression, Dictionary<string, string> m, DynamicParameters para, ISqlProvider sqlProvider) : base(para, sqlProvider)
         {
 
             _tempFieldName = "PJO_" + GetHashCode() + "_";

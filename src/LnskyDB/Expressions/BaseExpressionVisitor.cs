@@ -11,9 +11,10 @@ namespace LnskyDB.Expressions
 {
     internal class BaseExpressionVisitor : ExpressionVisitor
     {
-        public BaseExpressionVisitor(DynamicParameters param)
+        public BaseExpressionVisitor(DynamicParameters param, ISqlProvider sqlProvider)
         {
             Param = param;
+            ProviderOption = sqlProvider.GetProviderOption();
         }
         protected readonly StringBuilder _sqlCmd = new StringBuilder();
 
@@ -28,14 +29,14 @@ namespace LnskyDB.Expressions
         }
 
         private string ParamName => _parameterPrefix + TempFieldName;
+        private ProviderOption ProviderOption { get; set; }
 
+        protected char _parameterPrefix { get { return ProviderOption.ParameterPrefix; } }
 
-        protected readonly char _parameterPrefix = ProviderOption.Option.ParameterPrefix;
+        protected char _closeQuote { get { return ProviderOption.CloseQuote; } }
 
-        protected readonly char _closeQuote = ProviderOption.Option.CloseQuote;
-
-        protected readonly char _openQuote = ProviderOption.Option.OpenQuote;
-
+        protected char _openQuote { get { return ProviderOption.OpenQuote; } }
+        private bool? isEqualsBool { get; set; }
         #region 访问二元表达式
         /// <inheritdoc />
         /// <summary>
@@ -45,13 +46,33 @@ namespace LnskyDB.Expressions
         /// <returns></returns>
         protected override System.Linq.Expressions.Expression VisitBinary(BinaryExpression node)
         {
+            if (node.Right.NodeType == ExpressionType.Constant)
+            {
+                var val = ((ConstantExpression)node.Right).Value;
+                if (val is bool)
+                {
+                    bool v = (bool)val;
+                    if (node.NodeType == ExpressionType.NotEqual)
+                    {
+                        isEqualsBool = !v;
+                    }
+                    else if (node.NodeType == ExpressionType.Equal)
+                    {
+                        isEqualsBool = v;
+                    }
+                }
+            }
+            var tempIsEqualsBool = isEqualsBool;
             _sqlCmd.Append("(");
 
             VisitNode(node.Left, node.NodeType);
+            if (!tempIsEqualsBool.HasValue || isEqualsBool != null)
+            {
 
-            _sqlCmd.Append(node.GetExpressionType());
+                _sqlCmd.Append(node.GetExpressionType());
 
-            VisitNode(node.Right, node.NodeType);
+                VisitNode(node.Right, node.NodeType);
+            }
             _sqlCmd.Append(")");
 
             return node;
@@ -65,6 +86,11 @@ namespace LnskyDB.Expressions
                 case ExpressionType.AndAlso:
                 case ExpressionType.Or:
                 case ExpressionType.OrElse:
+                    if (isEqualsBool == false)
+                    {
+                        _sqlCmd.Append(" NOT ");
+                    }
+                    isEqualsBool = null;
                     Visit(exp);
                     return;
             }
@@ -83,7 +109,6 @@ namespace LnskyDB.Expressions
                 case ExpressionType.MultiplyChecked:
                 case ExpressionType.Subtract:
                 case ExpressionType.SubtractChecked:
-
                     Visit(exp);
                     return;
                 case ExpressionType.Call:
@@ -92,10 +117,31 @@ namespace LnskyDB.Expressions
                         Visit(exp);
                         return;
                     }
+
                     break;
             }
 
-            SetParam(GetExpressionValue(exp));
+            try
+            {
+                SetParam(GetExpressionValue(exp));
+            }
+            catch (InvalidOperationException)
+            {
+                bool isNot = false;
+                if (isEqualsBool == false)
+                {
+                    _sqlCmd.Append(" NOT (");
+                    isNot = true;
+                }
+                isEqualsBool = null;
+                Visit(exp);
+                if (isNot)
+                {
+                    _sqlCmd.Append(")");
+                }
+                return;
+            }
+
         }
 
 
@@ -285,7 +331,7 @@ namespace LnskyDB.Expressions
         }
 
 
-        private object GetExpressionValue(Expression valueExpression)
+        private static object GetExpressionValue(Expression valueExpression)
         {
             if (valueExpression == null)
             {
@@ -334,6 +380,8 @@ namespace LnskyDB.Expressions
                 case ExpressionType.OnesComplement:
                     result = Expression.Lambda(valueExpression).Compile().DynamicInvoke();
                     break;
+                default:
+                    throw new InvalidOperationException("不支持的类型");
             }
             return result;
         }

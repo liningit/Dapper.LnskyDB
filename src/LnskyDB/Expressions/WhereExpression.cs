@@ -29,7 +29,7 @@ namespace LnskyDB.Expressions
         /// <param name="prefix">字段前缀</param>
         /// <param name="providerOption"></param>
         /// <returns></returns>
-        public WhereExpression(LambdaExpression expression, string tableAlias, DynamicParameters para) : base(para)
+        public WhereExpression(LambdaExpression expression, string tableAlias, DynamicParameters para, ISqlProvider sqlProvider) : base(para, sqlProvider)
         {
             _tempFieldName = "P_" + tableAlias + GetHashCode() + "_";
 

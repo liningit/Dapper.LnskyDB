@@ -252,11 +252,11 @@ namespace LnskyDB.Internal
 
             }
 
-            var where = new WhereExpression(query.WhereExpression, "", dynamicParameters);
+            var where = new WhereExpression(query.WhereExpression, "", dynamicParameters, query.DBModel.GetDBModel_SqlProvider());
             sql.Append(where.SqlCmd);
             if (!isOnlyWhere)
             {
-                sql.Append(GetOrderBy(query.OrderbyList, dynamicParameters));
+                sql.Append(GetOrderBy(query.OrderbyList, dynamicParameters, query.DBModel.GetDBModel_SqlProvider()));
                 sql.Append(GetLimit(query));
             }
             return dynamicParameters;
@@ -264,27 +264,14 @@ namespace LnskyDB.Internal
 
         private static string GetLimit<T>(IQuery<T> query) where T : BaseDBModel
         {
-            if (query.StarSize < 0 || query.Rows < 0)
-            {
-                return "";
-            }
-            if (query.StarSize == 0 && query.Rows == 0)
-            {
-                return "";
-            }
-            if (query.Rows == 0)
-            {
-                return $" OFFSET {query.StarSize } ROWS";
-            }
-
-            return $" OFFSET {query.StarSize } ROWS FETCH NEXT {query.Rows} ROWS ONLY";
+            return query.DBModel.GetDBModel_SqlProvider().GetLimit(query.StarSize, query.Rows);
         }
-        private static string GetOrderBy(List<OrderCriteria> orderByLst, DynamicParameters dynamicParameters)
+        private static string GetOrderBy(List<OrderCriteria> orderByLst, DynamicParameters dynamicParameters, ISqlProvider sqlProvider)
         {
             var orderByList = orderByLst.Select(a =>
             {
 
-                var o = new JoinOrderExpression(a.Field, new Dictionary<string, string> { { "", "" } }, dynamicParameters);
+                var o = new JoinOrderExpression(a.Field, new Dictionary<string, string> { { "", "" } }, dynamicParameters, sqlProvider);
                 return o.SqlCmd + (a.OrderBy == EOrderBy.Asc ? " ASC " : " DESC ");
             }).ToList();
 

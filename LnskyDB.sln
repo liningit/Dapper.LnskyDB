@@ -5,7 +5,15 @@ VisualStudioVersion = 15.0.28307.539
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LnskyDB", "src\LnskyDB\LnskyDB.csproj", "{ED1219EB-BDE1-417D-9EAB-E8E361E14E96}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LnskyDB.Demo", "src\LnskyDB.Demo\LnskyDB.Demo.csproj", "{287977ED-CFD3-4987-B057-B34D92A08D9C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LnskyDB.Demo", "src\LnskyDB.Demo\LnskyDB.Demo.csproj", "{287977ED-CFD3-4987-B057-B34D92A08D9C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LnskyDB.MsSql", "src\LnskyDB.MsSql\LnskyDB.MsSql.csproj", "{1DBDBAD5-D4FB-4D68-B6ED-9231809659E3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LnskyDB.MySql", "src\LnskyDB.MySql\LnskyDB.MySql.csproj", "{6790DD8B-D196-498F-8D8B-53822BE075C8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LnskyDB.Test", "src\LnskyDB.Test\LnskyDB.Test.csproj", "{2E4DD5AD-4C5C-40DD-9717-369CA682B360}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LnskyDB.T4Test", "LnskyDB.T4Test\LnskyDB.T4Test.csproj", "{7974773F-429E-4A65-BAA8-BD6459F6E4D0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +29,22 @@ Global
 		{287977ED-CFD3-4987-B057-B34D92A08D9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{287977ED-CFD3-4987-B057-B34D92A08D9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{287977ED-CFD3-4987-B057-B34D92A08D9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DBDBAD5-D4FB-4D68-B6ED-9231809659E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DBDBAD5-D4FB-4D68-B6ED-9231809659E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DBDBAD5-D4FB-4D68-B6ED-9231809659E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DBDBAD5-D4FB-4D68-B6ED-9231809659E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6790DD8B-D196-498F-8D8B-53822BE075C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6790DD8B-D196-498F-8D8B-53822BE075C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6790DD8B-D196-498F-8D8B-53822BE075C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6790DD8B-D196-498F-8D8B-53822BE075C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E4DD5AD-4C5C-40DD-9717-369CA682B360}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E4DD5AD-4C5C-40DD-9717-369CA682B360}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E4DD5AD-4C5C-40DD-9717-369CA682B360}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E4DD5AD-4C5C-40DD-9717-369CA682B360}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7974773F-429E-4A65-BAA8-BD6459F6E4D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7974773F-429E-4A65-BAA8-BD6459F6E4D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7974773F-429E-4A65-BAA8-BD6459F6E4D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7974773F-429E-4A65-BAA8-BD6459F6E4D0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

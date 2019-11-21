@@ -16,7 +16,7 @@ namespace LnskyDB.Expressions
 
         Dictionary<string, string> _map = new Dictionary<string, string>();
 
-        public JoinSelectExpression(LambdaExpression expression, Dictionary<string, string> map, DynamicParameters para) : base(para)
+        public JoinSelectExpression(LambdaExpression expression, Dictionary<string, string> map, DynamicParameters para, ISqlProvider sqlProvider) : base(para, sqlProvider)
         {
             foreach (var v in map)
             {

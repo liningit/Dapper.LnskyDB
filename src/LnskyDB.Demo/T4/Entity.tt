@@ -26,6 +26,7 @@
 		manager.StartBlock("LnskyDB.Demo\\Entity\\"+tableInfo.TablePre+"\\"+tableInfo.TableName+"Entity.cs");
 #>
 using LnskyDB.Model;
+using LnskyDB.MsSql;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Immutable;
@@ -44,6 +45,8 @@ namespace LnskyDB.Demo.Entity.<#=tableInfo.TablePre #>
 		}
 		<#}#>
 
+		public static ISqlProvider _DBModel_SqlProvider = new MsSqlProvider();
+		public override ISqlProvider GetDBModel_SqlProvider() => _DBModel_SqlProvider;
         public override string GetDBModel_TableName() => "<#=tableInfo.DBModel_TableName #>{0}";
         public override string GetDBModel_DBName() => "<#= tableInfo.DatabaseName #>{0}";
 				<#if (tableInfo.ShuffledConfig != null)

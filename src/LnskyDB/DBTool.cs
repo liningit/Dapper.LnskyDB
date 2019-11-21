@@ -40,7 +40,7 @@ namespace LnskyDB
             {
                 return ThreadLnskyDBConnLst;
             }
-            if (HttpContext.HttpContext != null && HttpContext.HttpContext.RequestServices != null)
+            if (HttpContext?.HttpContext != null && HttpContext.HttpContext.RequestServices != null)
             {
                 var url = HttpContext.HttpContext.Request;
                 return HttpContext.HttpContext.RequestServices.GetService<LnskyDBConnLst>();
@@ -79,7 +79,7 @@ namespace LnskyDB
             }
             ThreadLnskyDBConnLst = null;
         }
-        internal static IConfiguration Configuration { get; set; }
+        public static IConfiguration Configuration { get; set; }
         internal static IHttpContextAccessor HttpContext { get; set; }
 
         internal static Expression<Func<T, bool>> GetContains<T>(string propertyName, string propertyValue)
@@ -96,10 +96,11 @@ namespace LnskyDB
             {
                 obj = new T();
             }
-            return GetConnection(obj.GetDBModel_DBName(), obj.GetShuffledModel());
+            return GetConnection(obj.GetDBModel_SqlProvider(), obj.GetDBModel_DBName(), obj.GetShuffledModel());
         }
-        public static DbConnection GetConnection(string key, ShuffledModel shuffle)
+        public static DbConnection GetConnection(ISqlProvider sqlProvider, string key, ShuffledModel shuffle)
         {
+
             var connStr = Configuration.GetConnectionString(string.Format(key, shuffle.DBId));
             if (string.IsNullOrEmpty(connStr))
             {
@@ -111,7 +112,7 @@ namespace LnskyDB
             connLst.TryGetValue(connStr, out conn);
             if (conn == null)
             {
-                conn = new SqlConnection(connStr);
+                conn = sqlProvider.GetConnection(connStr);
                 connLst.Add(connStr, conn);
             }
             try

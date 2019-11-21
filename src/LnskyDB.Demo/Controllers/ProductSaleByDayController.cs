@@ -17,6 +17,7 @@ namespace LnskyDB.Demo.Controllers
         static int i = 0;
         private static IRepository<ProductSaleByDayEntity> GetRepository()
         {
+            
             i++;
             if (i % 2 == 0)
             {
@@ -33,7 +34,7 @@ namespace LnskyDB.Demo.Controllers
 
         [HttpGet]
         public ActionResult<ProductSaleByDayEntity> Get(Guid sysNo)
-        {
+        { 
 
             var repository = GetRepository();
             var entity = repository.Get(new ProductSaleByDayEntity

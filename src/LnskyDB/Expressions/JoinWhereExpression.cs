@@ -31,7 +31,7 @@ namespace LnskyDB.Expressions
         /// <param name="prefix">字段前缀</param>
         /// <param name="providerOption"></param>
         /// <returns></returns>
-        public JoinWhereExpression(LambdaExpression expression, Dictionary<string, string> map, DynamicParameters para) : base(para)
+        public JoinWhereExpression(LambdaExpression expression, Dictionary<string, string> map, DynamicParameters para,ISqlProvider sqlProvider) : base(para, sqlProvider)
         {
             if (expression == null)
             {

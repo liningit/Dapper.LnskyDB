@@ -18,7 +18,7 @@ namespace LnskyDB.Expressions
 
         public Dictionary<string, string> JoinDic { get; set; } = new Dictionary<string, string>();
 
-        public JoinExpression(LambdaExpression expression, Dictionary<string, string> m, DynamicParameters para) : base(para)
+        public JoinExpression(LambdaExpression expression, Dictionary<string, string> m, DynamicParameters para, ISqlProvider sqlProvider) : base(para, sqlProvider)
         {
 
             _tempFieldName = "PJ_" + GetHashCode() + "_";

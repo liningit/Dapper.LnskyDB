@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LnskyDB.MsSql\LnskyDB.MsSql.csproj" />
     <ProjectReference Include="..\LnskyDB\LnskyDB.csproj" />
   </ItemGroup>
 

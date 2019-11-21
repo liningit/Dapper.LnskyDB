@@ -1,4 +1,5 @@
 ﻿using LnskyDB.Model;
+using LnskyDB.MsSql;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Immutable;
@@ -10,6 +11,8 @@ namespace LnskyDB.Demo.Entity.Purify
         public override ImmutableList<string> GetDBModel_PKCols() => _DBModel_PKCols;
  
 		
+		public static ISqlProvider _DBModel_SqlProvider = new MsSqlProvider();
+		public override ISqlProvider GetDBModel_SqlProvider() => _DBModel_SqlProvider;
         public override string GetDBModel_TableName() => "Purify_ProductSaleByDayNS{0}";
         public override string GetDBModel_DBName() => "LnskyNS{0}";
 				

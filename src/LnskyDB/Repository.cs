@@ -33,7 +33,7 @@ namespace LnskyDB
             {
                 obj = dbModel;
             }
-            return DBTool.GetConnection(obj.GetDBModel_DBName(), obj.GetShuffledModel());
+            return DBTool.GetConnection(obj);
 
         }
         public List<T> GetList(IQuery<T> query)
@@ -135,7 +135,7 @@ namespace LnskyDB
             return GetList(GetConn(obj).Query<R>(sql: sql, param: par, commandTimeout: CommandTimeout));
         }
 
-        public List<R> GetList<R>(ISelectResult<R> query) 
+        public List<R> GetList<R>(ISelectResult<R> query)
         {
             Type typeFromHandle = typeof(R);
             ConstructorInfo right = typeFromHandle.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).FirstOrDefault((ConstructorInfo x) => x.GetParameters().Length == 0);

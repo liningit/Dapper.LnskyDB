@@ -6,7 +6,7 @@ using System.Text;
 
 namespace LnskyDB.Model
 {
-    public class BaseDBModel
+    public abstract class BaseDBModel
     {
         public BaseDBModel()
         {
@@ -26,7 +26,7 @@ namespace LnskyDB.Model
         /// </summary>
         public virtual string GetDBModel_IncrementCol() => string.Empty;
         public virtual bool GetDBModel_IsShuffled() => false;
-
+        public abstract ISqlProvider GetDBModel_SqlProvider();
         public virtual void SetIncrementValue(int value)
         {
             throw new Exception("该表没有自增列");
@@ -43,12 +43,12 @@ namespace LnskyDB.Model
         /// <summary>
         /// 表名
         /// </summary>
-        public virtual string GetDBModel_TableName() => null;
+        public abstract string GetDBModel_TableName();
         /// <summary>
         /// 数据库名称
         /// </summary>
         /// <returns></returns>
-        public virtual string GetDBModel_DBName() => null;
+        public abstract string GetDBModel_DBName();
         /// <summary>
         /// 获取分库分表信息,如果没有分库分表则可以不重写
         /// </summary>

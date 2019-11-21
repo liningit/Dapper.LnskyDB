@@ -14,7 +14,7 @@ namespace LnskyDB.Helper
         Dictionary<string, string> _map = new Dictionary<string, string>();
         string _namePre = string.Empty;
 
-        public JoinResultMapExpression(LambdaExpression expression, Dictionary<string, string> left, string right, DynamicParameters para) : base(para)
+        public JoinResultMapExpression(LambdaExpression expression, Dictionary<string, string> left, string right, DynamicParameters para, ISqlProvider sqlProvider) : base(para, sqlProvider)
         {
             _tempFieldName = "PJR_" + GetHashCode() + "_";
             foreach (var v in left)
