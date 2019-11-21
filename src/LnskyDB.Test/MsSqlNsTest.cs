@@ -153,6 +153,21 @@ namespace Tests
             Assert.AreEqual(model.SysNo, entity.SysNo);
             Assert.AreEqual(model.ShopID, entity.ShopID);
             Assert.AreEqual(model.ProductName, entity.ProductName);
+
+            entity = repository.Get("select * from Purify_ProductSaleByDayNS where SysNo=@SysNo", model);
+
+            Assert.NotNull(entity);
+            Assert.AreEqual(model.SysNo, entity.SysNo);
+            Assert.AreEqual(model.ShopID, entity.ShopID);
+            Assert.AreEqual(model.ProductName, entity.ProductName);
+
+            entity = repository.Get<ProductSaleByDayNSEntity>("select * from Purify_ProductSaleByDayNS where SysNo=@SysNo", model);
+
+            Assert.NotNull(entity);
+            Assert.AreEqual(model.SysNo, entity.SysNo);
+            Assert.AreEqual(model.ShopID, entity.ShopID);
+            Assert.AreEqual(model.ProductName, entity.ProductName);
+
         }
         [Test]
         public void TestProductSaleByDayNSGetList()
@@ -174,9 +189,7 @@ namespace Tests
             var c = repository.Count(query);
             Assert.True(c == 0);
 
-            query = QueryFactory.Create<ProductSaleByDayNSEntity>();
-
-            lst = repository.GetList(query);
+            lst = repository.GetList();
             lst[0].ProductName = "";
             repository.Update(lst[0]);
             var all = lst.AsQueryable();
@@ -264,8 +277,11 @@ namespace Tests
             var tempRes = query.Select(m => m.SysNo);
             where = m => tempRes.Contains(m.SysNo);
             query = QueryFactory.Create(where);
-            c = repository.Count(query);
-            Assert.AreEqual(c, 10);
+            var r = query.Select(m => DBFunction.Function<string>("substring", m.ProductName, 1, 3));
+            var l = repository.GetList(r);
+            var l2 = repository.GetList(where);
+            Assert.AreEqual(l.Count, 10);
+            Assert.AreEqual(l2.Count, 10);
             TestJq1();
             TestJq2();
 
@@ -389,11 +405,8 @@ namespace Tests
             Assert.AreEqual(model.DataSource, entity.DataSource);
             Assert.AreEqual(model.ProductName, entity.ProductName);
         }
-        [Test]
         public void TestProductSaleByDayNSUpdateWhere()
         {
-            TestProductSaleByDayNSAdd();
-            TestProductSaleByDayNSUpdate();
             var repository = GetRepository();
             var queryCount = QueryFactory.Create<ProductSaleByDayNSEntity>(m => !m.ProductName.Contains("没有") && m.ProductName.Contains("修改"));
 
@@ -410,8 +423,32 @@ namespace Tests
             int updateCount = repository.Update(updateEntity, where);
             Assert.AreEqual(updateCount, count);
             Assert.AreNotEqual(updateCount, 0);
+        }
+        public void TestProductSaleByDayNSDelete()
+        {
+            var repository = GetRepository();
+            var query = QueryFactory.Create<ProductSaleByDayNSEntity>();
+            query.And(m => !m.DataSource.Contains("修改"));
+            query.OrderByDescing(m => m.StatisticalDate);
+            query.StarSize = new Random().Next(5);
+            query.Rows = 1;
+            var model = repository.GetPaging(query).ToList()[0];
+            repository.Delete(model);
+            var deleteCount = repository.Delete(m => m.DataSource == "测试来源批量修改");
+            Assert.True(deleteCount > 0);
 
         }
+        [Test]
+        public void TestProductSaleByDayNSAddUpdateDelete()
+        {
+            TestProductSaleByDayNSAdd();
+            TestProductSaleByDayNSUpdate();
+            TestProductSaleByDayNSUpdateWhere();
+            TestProductSaleByDayNSDelete();
+        }
+
+
+
         [TearDown]
         public void TestTearDown()
         {

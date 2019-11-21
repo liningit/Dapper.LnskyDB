@@ -9,6 +9,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Collections.Generic;
 using System.IO;
+using LnskyDB.Model;
 
 namespace Tests
 {
@@ -140,6 +141,14 @@ namespace Tests
             Assert.NotNull(entity);
             Assert.AreEqual(model.SysNo, entity.SysNo);
             Assert.AreEqual(model.ShopName, entity.ShopName);
+            entity = repository.Get<ProductSaleByDayEntity>(model, "select * from Purify_ProductSaleByDay_01 where SysNo=@SysNo", new { model.SysNo });
+            Assert.NotNull(entity);
+            Assert.AreEqual(model.SysNo, entity.SysNo);
+            Assert.AreEqual(model.ShopName, entity.ShopName);
+            entity = repository.Get(model, "select * from Purify_ProductSaleByDay_01 where SysNo=@SysNo", new { model.SysNo });
+            Assert.NotNull(entity);
+            Assert.AreEqual(model.SysNo, entity.SysNo);
+            Assert.AreEqual(model.ShopName, entity.ShopName);
         }
         [Test]
         public void TestProductSaleByDayGetList()
@@ -262,6 +271,19 @@ namespace Tests
             c = repository.Count(query);
             Assert.AreEqual(c, 10);
 
+            bool hasError = false;
+            try
+            {
+
+                where = m => sysNos.Contains(m.SysNo);
+                query = QueryFactory.Create(where);
+                c = repository.Count(query);
+            }
+            catch (NoShuffledException)
+            {
+                hasError = true;
+            }
+            Assert.True(hasError);
         }
         [Test]
         public void TestProductSaleByDayGetPaging()
