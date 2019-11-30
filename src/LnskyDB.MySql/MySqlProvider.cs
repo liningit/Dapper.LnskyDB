@@ -35,5 +35,10 @@ namespace LnskyDB.MySql
         {
             return Option;
         }
+
+        public string GetSelectIncrement()
+        {
+            return "select LAST_INSERT_ID() as Id";
+        }
     }
 }

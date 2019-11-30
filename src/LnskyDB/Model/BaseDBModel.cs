@@ -15,7 +15,7 @@ namespace LnskyDB.Model
         /// <summary>
         /// 主键
         /// </summary>
-        public virtual ImmutableList<string> GetDBModel_PKCols() => null;
+        public abstract ImmutableList<string> GetDBModel_PKCols();
         private static ImmutableList<string> _DBModel_ExcludeColsForUpdate = ImmutableList.Create<string>();
         /// <summary>
         /// 更新时忽略的列

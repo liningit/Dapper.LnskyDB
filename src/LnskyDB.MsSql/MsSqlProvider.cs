@@ -33,5 +33,10 @@ namespace LnskyDB.MsSql
         {
             return Option;
         }
+
+        public string GetSelectIncrement()
+        {
+            return "select SCOPE_IDENTITY() as Id";
+        }
     }
 }

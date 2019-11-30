@@ -3,6 +3,7 @@
 <#@ assembly name="System.Data.dll" #>
 <#@ assembly name="System.Data.DataSetExtensions.dll" #>
 <#@ assembly name="System.Xml.dll" #>
+<#@ assembly name="$(ProjectDir)\PublicDll\MySql.Data.dll" #>
 <#@ import namespace="System" #>
 <#@ import namespace="System.Xml" #>
 <#@ import namespace="System.Linq" #>
@@ -11,6 +12,7 @@
 <#@ import namespace="System.Data.SqlClient" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.IO" #>
+<#@ import namespace="MySql.Data.MySqlClient" #>
 <#@ include file="$(ProjectDir)MySqlT4/Manager.ttinclude"	#>
 <#@ include file="$(ProjectDir)MySqlT4/DbHelper.ttinclude"	#>
 <#@ output extension=".cs"#>
@@ -23,14 +25,14 @@
 	GenerationEnvironment.Clear();
 	foreach(var tableInfo in Tool.GetTableInfos())
 	{		 
-		manager.StartBlock("LnskyDB.Test\\MsSql\\Entity\\"+tableInfo.TablePre+"\\"+tableInfo.TableName+"Entity.cs");
+		manager.StartBlock("LnskyDB.Test\\MySql\\Entity\\"+tableInfo.TablePre+"\\"+tableInfo.TableName+"Entity.cs");
 #>
 using LnskyDB.Model;
-using LnskyDB.MsSql;
+using LnskyDB.MySql;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Immutable;
-namespace LnskyDB.Test.MsSql.Entity.<#=tableInfo.TablePre #>
+namespace LnskyDB.Test.MySql.Entity.<#=tableInfo.TablePre #>
 {
     public class <#=tableInfo.TableName #>Entity : BaseDBModel
     {
@@ -45,7 +47,7 @@ namespace LnskyDB.Test.MsSql.Entity.<#=tableInfo.TablePre #>
 		}
 		<#}#>
 
-		public static ISqlProvider _DBModel_SqlProvider = new MsSqlProvider();
+		public static ISqlProvider _DBModel_SqlProvider = new MySqlProvider();
 		public override ISqlProvider GetDBModel_SqlProvider() => _DBModel_SqlProvider;
         public override string GetDBModel_TableName() => "<#=tableInfo.DBModel_TableName #>{0}";
         public override string GetDBModel_DBName() => "<#= tableInfo.DatabaseName #>{0}";
@@ -99,12 +101,12 @@ namespace LnskyDB.Test.MsSql.Entity.<#=tableInfo.TablePre #>
 }
 <# 
 		manager.EndBlock();
-		manager.StartBlock("LnskyDB.Test\\MsSql\\RepositoryInterface\\"+tableInfo.TablePre+"\\I"+tableInfo.TableName+"Repository.cs",false);
+		manager.StartBlock("LnskyDB.Test\\MySql\\RepositoryInterface\\"+tableInfo.TablePre+"\\I"+tableInfo.TableName+"Repository.cs",false);
 #>
 using LnskyDB;
-using LnskyDB.Test.MsSql.Entity.<#=tableInfo.TablePre #>;
+using LnskyDB.Test.MySql.Entity.<#=tableInfo.TablePre #>;
 
-namespace LnskyDB.Test.MsSql.RepositoryInterface.<#=tableInfo.TablePre #>
+namespace LnskyDB.Test.MySql.RepositoryInterface.<#=tableInfo.TablePre #>
 {
     public interface I<#=tableInfo.TableName #>Repository : IRepository<<#=tableInfo.TableName #>Entity>
     {
@@ -112,13 +114,13 @@ namespace LnskyDB.Test.MsSql.RepositoryInterface.<#=tableInfo.TablePre #>
 }
 <# 
 		manager.EndBlock();
-		manager.StartBlock("LnskyDB.Test\\MsSql\\Repository\\"+tableInfo.TablePre+"\\"+tableInfo.TableName+"Repository.cs",false);
+		manager.StartBlock("LnskyDB.Test\\MySql\\Repository\\"+tableInfo.TablePre+"\\"+tableInfo.TableName+"Repository.cs",false);
 #>
 using LnskyDB;
-using LnskyDB.Test.MsSql.Entity.<#=tableInfo.TablePre #>;
-using LnskyDB.Test.MsSql.RepositoryInterface.<#=tableInfo.TablePre #>;
+using LnskyDB.Test.MySql.Entity.<#=tableInfo.TablePre #>;
+using LnskyDB.Test.MySql.RepositoryInterface.<#=tableInfo.TablePre #>;
 
-namespace LnskyDB.Test.MsSql.Repository.<#=tableInfo.TablePre #>
+namespace LnskyDB.Test.MySql.Repository.<#=tableInfo.TablePre #>
 {
     public class <#=tableInfo.TableName #>Repository : Repository<<#=tableInfo.TableName #>Entity>, I<#=tableInfo.TableName #>Repository
     {

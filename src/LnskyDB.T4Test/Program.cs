@@ -10,6 +10,9 @@ namespace LnskyDB.T4Test
     {
         static void Main(string[] args)
         {
+          
+            var t = Tool.GetTableInfos();
+           
         }
     }
 }

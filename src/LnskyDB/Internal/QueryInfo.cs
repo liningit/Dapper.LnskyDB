@@ -162,9 +162,9 @@ namespace LnskyDB.Internal
         {
 
             var dynamicParameters = new DynamicParameters();
-            var selExp = new JoinSelectExpression(sel, new Dictionary<string, string> { { "", "[jtmp]" } }, dynamicParameters, DBModel.GetDBModel_SqlProvider());
-            var selSql = string.Join(",", selExp.QueryColumns).Replace("[jtmp].", "");
-            var sql = new StringBuilder($"SELECT {selSql} FROM {DBTool.GetTableName(this.DBModel)} {DBTool.GetTableWith(this)} WHERE 1=1");
+            var selExp = new JoinSelectExpression(sel, new Dictionary<string, string> { { "", $"{this.DBModel.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}jtmp{this.DBModel.GetDBModel_SqlProvider().GetProviderOption().CloseQuote}" } }, dynamicParameters, DBModel.GetDBModel_SqlProvider());
+            var selSql = string.Join(",", selExp.QueryColumns).Replace($"{this.DBModel.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}jtmp{this.DBModel.GetDBModel_SqlProvider().GetProviderOption().CloseQuote}.", "");
+            var sql = new StringBuilder($"SELECT {selSql} FROM {this.DBModel.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}{DBTool.GetTableName(this.DBModel)}{this.DBModel.GetDBModel_SqlProvider().GetProviderOption().CloseQuote} {DBTool.GetTableWith(this)} WHERE 1=1");
             var countSql = new StringBuilder($"SELECT COUNT(1) FROM {DBTool.GetTableName(this.DBModel)} {DBTool.GetTableWith(this)} WHERE 1=1");
 
             var whereExp = new WhereExpression(WhereExpression, "", dynamicParameters, DBModel.GetDBModel_SqlProvider());

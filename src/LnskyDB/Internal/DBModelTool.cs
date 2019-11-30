@@ -26,7 +26,7 @@ namespace LnskyDB.Internal
         internal static List<T> GetAll<T>(this DbConnection conn, int? commandTimeout = null) where T : BaseDBModel, new()
         {
             T obj = new T();
-            var sql = $"SELECT * FROM [{DBTool.GetTableName(obj)}] ";
+            var sql = $"SELECT * FROM {obj.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}{DBTool.GetTableName(obj)}{obj.GetDBModel_SqlProvider().GetProviderOption().CloseQuote} ";
             try
             {
                 var lst = conn.Query<T>(sql: sql, param: obj, commandTimeout: commandTimeout).AsList();
@@ -61,7 +61,7 @@ namespace LnskyDB.Internal
 
         internal static long Count<T>(this DbConnection conn, IQuery<T> query, int? commandTimeout = null) where T : BaseDBModel
         {
-            var sql = new StringBuilder($"SELECT COUNT(1) FROM [{DBTool.GetTableName(query.DBModel)}]  {DBTool.GetTableWith(query)}  WHERE 1=1 ");
+            var sql = new StringBuilder($"SELECT COUNT(1) FROM {query.DBModel.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}{DBTool.GetTableName(query.DBModel)}{query.DBModel.GetDBModel_SqlProvider().GetProviderOption().CloseQuote}  {DBTool.GetTableWith(query)}  WHERE 1=1 ");
             DynamicParameters dynamicParameters = SetWhereSql(query, sql, true);
             try
             {
@@ -75,7 +75,7 @@ namespace LnskyDB.Internal
         }
         internal static List<T> GetList<T>(this DbConnection conn, IQuery<T> query, int? commandTimeout = null) where T : BaseDBModel
         {
-            var sql = new StringBuilder($"SELECT * FROM [{DBTool.GetTableName(query.DBModel)}] {DBTool.GetTableWith(query)} WHERE 1=1 ");
+            var sql = new StringBuilder($"SELECT * FROM {query.DBModel.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}{DBTool.GetTableName(query.DBModel)}{query.DBModel.GetDBModel_SqlProvider().GetProviderOption().CloseQuote} {DBTool.GetTableWith(query)} WHERE 1=1 ");
             DynamicParameters dynamicParameters = SetWhereSql(query, sql);
             try
             {
@@ -92,7 +92,7 @@ namespace LnskyDB.Internal
 
         internal static IEnumerable<R> GetList<R, T>(this DbConnection conn, IQuery<T> query, int? commandTimeout = null) where T : BaseDBModel
         {
-            var sql = new StringBuilder($"SELECT * FROM [{DBTool.GetTableName(query.DBModel)}]  {DBTool.GetTableWith(query)}  WHERE 1=1 ");
+            var sql = new StringBuilder($"SELECT * FROM {query.DBModel.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}{DBTool.GetTableName(query.DBModel)}{query.DBModel.GetDBModel_SqlProvider().GetProviderOption().CloseQuote}  {DBTool.GetTableWith(query)}  WHERE 1=1 ");
             DynamicParameters dynamicParameters = SetWhereSql(query, sql);
             try
             {
@@ -111,7 +111,7 @@ namespace LnskyDB.Internal
             {
                 throw new Exception("没有筛选条件");
             }
-            var sql = $"SELECT * FROM [{DBTool.GetTableName(obj)}] {DBTool.GetTableWith(obj)} WHERE " + GetSql(obj.GetDBModel_ChangeList(), "AND");
+            var sql = $"SELECT * FROM {obj.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}{DBTool.GetTableName(obj)}{obj.GetDBModel_SqlProvider().GetProviderOption().CloseQuote} {DBTool.GetTableWith(obj)} WHERE " + GetSql(obj, obj.GetDBModel_ChangeList(), "AND");
             try
             {
                 var res = conn.QueryFirstOrDefault<T>(sql: sql, param: obj, commandTimeout: commandTimeout);
@@ -134,7 +134,7 @@ namespace LnskyDB.Internal
             var elst = obj.GetDBModel_PKCols().AddRange(obj.GetDBModel_ExcludeColsForUpdate());
             var updateList = obj.GetDBModel_ChangeList().Where(m => m != obj.GetDBModel_IncrementCol() && !elst.Contains(m)).ToList();
 
-            var sql = new StringBuilder($"UPDATE [{DBTool.GetTableName(obj)}] SET {GetSql(updateList, ",")} WHERE 1=1");
+            var sql = new StringBuilder($"UPDATE {obj.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}{DBTool.GetTableName(obj)}{obj.GetDBModel_SqlProvider().GetProviderOption().CloseQuote} SET {GetSql(obj, updateList, ",")} WHERE 1=1");
             DynamicParameters dynamicParameters = SetWhereSql(where, sql);
             dynamicParameters.AddDynamicParams(obj);
             try
@@ -160,7 +160,7 @@ namespace LnskyDB.Internal
             }
             var elst = obj.GetDBModel_PKCols().AddRange(obj.GetDBModel_ExcludeColsForUpdate());
             var updateList = obj.GetDBModel_ChangeList().Where(m => m != obj.GetDBModel_IncrementCol() && !elst.Contains(m)).ToList();
-            var sql = $"UPDATE [{DBTool.GetTableName(obj)}] SET {GetSql(updateList, ",")} WHERE {GetSql(obj.GetDBModel_PKCols(), "AND")}";
+            var sql = $"UPDATE {obj.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}{DBTool.GetTableName(obj)}{obj.GetDBModel_SqlProvider().GetProviderOption().CloseQuote} SET {GetSql(obj, updateList, ",")} WHERE {GetSql(obj, obj.GetDBModel_PKCols(), "AND")}";
             try
             {
                 return conn.Execute(sql: sql, param: obj, commandTimeout: commandTimeout) > 0;
@@ -178,7 +178,7 @@ namespace LnskyDB.Internal
             {
                 throw new Exception("没有主键");
             }
-            var sql = $"DELETE FROM [{DBTool.GetTableName(obj)}] WHERE {GetSql(obj.GetDBModel_PKCols(), "AND")}";
+            var sql = $"DELETE FROM {obj.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}{DBTool.GetTableName(obj)}{obj.GetDBModel_SqlProvider().GetProviderOption().CloseQuote} WHERE {GetSql(obj, obj.GetDBModel_PKCols(), "AND")}";
             try
             {
                 return conn.Execute(sql: sql, param: obj, commandTimeout: commandTimeout) == 1;
@@ -191,7 +191,7 @@ namespace LnskyDB.Internal
         }
         internal static int Delete<T>(this DbConnection conn, IQuery<T> where, int? commandTimeout = null) where T : BaseDBModel
         {
-            var sql = new StringBuilder($"DELETE FROM [{DBTool.GetTableName(where.DBModel)}] WHERE 1=1 ");
+            var sql = new StringBuilder($"DELETE FROM {where.DBModel.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}{DBTool.GetTableName(where.DBModel)}{where.DBModel.GetDBModel_SqlProvider().GetProviderOption().CloseQuote} WHERE 1=1 ");
             DynamicParameters dynamicParameters = SetWhereSql(where, sql);
 
             try
@@ -210,12 +210,12 @@ namespace LnskyDB.Internal
             {
                 throw new Exception("没有修改列");
             }
-            var sql = $"INSERT INTO [{DBTool.GetTableName(obj)}]({string.Join(',', obj.GetDBModel_ChangeList())}) VALUES(@{string.Join(",@", obj.GetDBModel_ChangeList())});";
+            var sql = $"INSERT INTO {obj.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}{DBTool.GetTableName(obj)}{obj.GetDBModel_SqlProvider().GetProviderOption().CloseQuote}({string.Join(',', obj.GetDBModel_ChangeList())}) VALUES(@{string.Join(",@", obj.GetDBModel_ChangeList())});";
             try
             {
                 if (!string.IsNullOrEmpty(obj.GetDBModel_IncrementCol()))
                 {
-                    sql += "select LAST_INSERT_ID() as Id";
+                    sql += obj.GetDBModel_SqlProvider().GetSelectIncrement();
                     var v = conn.ExecuteScalar<int>(sql: sql, param: obj, commandTimeout: commandTimeout);
                     obj.SetIncrementValue(v);
                 }
@@ -242,7 +242,7 @@ namespace LnskyDB.Internal
                 throw new DapperExtensionException("查询实体不可以赋值!");
             }
 
-            var whereSql = GetSql(query.DBModel.GetDBModel_ChangeList(), "AND", "");
+            var whereSql = GetSql(query.DBModel, query.DBModel.GetDBModel_ChangeList(), "AND", "");
             if (!string.IsNullOrEmpty(whereSql))
             {
                 throw new DapperExtensionException("查询实体不可以赋值!");
@@ -280,7 +280,7 @@ namespace LnskyDB.Internal
             return "ORDER BY " + string.Join(",", orderByList);
         }
 
-        private static string GetSql(ICollection<string> keys, string addPre, string tableAlias = "")
+        private static string GetSql(BaseDBModel obj, ICollection<string> keys, string addPre, string tableAlias = "")
         {
             if (!string.IsNullOrEmpty(tableAlias))
             {
@@ -293,7 +293,7 @@ namespace LnskyDB.Internal
                 {
                     sql.Append($" {addPre} ");
                 }
-                sql.Append($"{tableAlias}[{k}]=@{k}");
+                sql.Append($"{tableAlias}{obj.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}{k}{obj.GetDBModel_SqlProvider().GetProviderOption().CloseQuote}=@{k}");
             }
             return sql.ToString();
         }
