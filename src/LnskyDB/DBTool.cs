@@ -90,6 +90,14 @@ namespace LnskyDB
             ConstantExpression constant = Expression.Constant(propertyValue, typeof(string));
             return Expression.Lambda<Func<T, bool>>(Expression.Call(member, method, constant), parameter);
         }
+        public static DbConnection GetConnectionT<T>(T obj) where T : BaseDBModel
+        {
+            if (obj == null)
+            {
+                throw new Exception("对象不可为空");
+            }
+            return GetConnection(obj.GetDBModel_SqlProvider(), obj.GetDBModel_DBName(), obj.GetShuffledModel());
+        }
         public static DbConnection GetConnection<T>(T obj) where T : BaseDBModel, new()
         {
             if (obj == null)

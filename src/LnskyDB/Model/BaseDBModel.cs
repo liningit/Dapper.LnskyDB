@@ -6,16 +6,36 @@ using System.Text;
 
 namespace LnskyDB.Model
 {
-    public abstract class BaseDBModel
+    public class BaseDBModel
     {
         public BaseDBModel()
         {
 
         }
+
+        #region 实体类必须实现
         /// <summary>
         /// 主键
         /// </summary>
-        public abstract ImmutableList<string> GetDBModel_PKCols();
+        public virtual ImmutableList<string> GetDBModel_PKCols() => null;
+        /// <summary>
+        /// 返回数据库提供程序
+        /// </summary>
+        /// <returns></returns>
+        public virtual ISqlProvider GetDBModel_SqlProvider() => null;
+        /// <summary>
+        /// 表名
+        /// </summary>
+        public virtual string GetDBModel_TableName() => null;
+        /// <summary>
+        /// 数据库名称
+        /// </summary>
+        /// <returns></returns>
+        public virtual string GetDBModel_DBName() => null;
+        #endregion;
+
+
+
         private static ImmutableList<string> _DBModel_ExcludeColsForUpdate = ImmutableList.Create<string>();
         /// <summary>
         /// 更新时忽略的列
@@ -26,7 +46,7 @@ namespace LnskyDB.Model
         /// </summary>
         public virtual string GetDBModel_IncrementCol() => string.Empty;
         public virtual bool GetDBModel_IsShuffled() => false;
-        public abstract ISqlProvider GetDBModel_SqlProvider();
+
         public virtual void SetIncrementValue(int value)
         {
             throw new Exception("该表没有自增列");
@@ -40,15 +60,7 @@ namespace LnskyDB.Model
         {
             this._tableWith = tableWith;
         }
-        /// <summary>
-        /// 表名
-        /// </summary>
-        public abstract string GetDBModel_TableName();
-        /// <summary>
-        /// 数据库名称
-        /// </summary>
-        /// <returns></returns>
-        public abstract string GetDBModel_DBName();
+
         /// <summary>
         /// 获取分库分表信息,如果没有分库分表则可以不重写
         /// </summary>

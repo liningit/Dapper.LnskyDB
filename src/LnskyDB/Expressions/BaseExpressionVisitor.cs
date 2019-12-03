@@ -36,7 +36,7 @@ namespace LnskyDB.Expressions
         protected char _closeQuote { get { return ProviderOption.CloseQuote; } }
 
         protected char _openQuote { get { return ProviderOption.OpenQuote; } }
-        private bool? isEqualsBool { get; set; }
+
         #region 访问二元表达式
         /// <inheritdoc />
         /// <summary>
@@ -46,6 +46,7 @@ namespace LnskyDB.Expressions
         /// <returns></returns>
         protected override System.Linq.Expressions.Expression VisitBinary(BinaryExpression node)
         {
+            bool? isEqualsBool = null;
             if (node.Right.NodeType == ExpressionType.Constant)
             {
                 var val = ((ConstantExpression)node.Right).Value;
@@ -62,23 +63,23 @@ namespace LnskyDB.Expressions
                     }
                 }
             }
-            var tempIsEqualsBool = isEqualsBool;
-            _sqlCmd.Append("(");
 
-            VisitNode(node.Left, node.NodeType);
+            _sqlCmd.Append("(");
+            var tempIsEqualsBool = isEqualsBool;
+            VisitNode(node.Left, node.NodeType, ref isEqualsBool);
             if (!tempIsEqualsBool.HasValue || isEqualsBool != null)
             {
-
+                isEqualsBool = null;
                 _sqlCmd.Append(node.GetExpressionType());
 
-                VisitNode(node.Right, node.NodeType);
+                VisitNode(node.Right, node.NodeType, ref isEqualsBool);
             }
             _sqlCmd.Append(")");
 
             return node;
         }
 
-        private void VisitNode(Expression exp, ExpressionType ptype)
+        private void VisitNode(Expression exp, ExpressionType ptype, ref bool? isEqualsBool)
         {
             switch (ptype)
             {
@@ -123,7 +124,7 @@ namespace LnskyDB.Expressions
 
             try
             {
-                SetParam(GetExpressionValue(exp));
+                SetParam(GetExpressionValue(exp));                
             }
             catch (InvalidOperationException)
             {

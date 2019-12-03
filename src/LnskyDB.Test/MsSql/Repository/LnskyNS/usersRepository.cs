@@ -4,7 +4,7 @@ using LnskyDB.Test.MsSql.RepositoryInterface.LnskyNS;
 
 namespace LnskyDB.Test.MsSql.Repository.LnskyNS
 {
-    public class usersRepository : Repository<usersEntity>, IusersRepository
+    public class UsersRepository : Repository<UsersEntity>, IUsersRepository
     {
     }
 }

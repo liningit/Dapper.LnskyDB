@@ -9,6 +9,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Collections.Generic;
 using System.IO;
+using LnskyDB.Test.MsSql.Entity.LnskyNS;
+using LnskyDB.Test.MsSql.Repository.LnskyNS;
 
 namespace Tests
 {
@@ -173,30 +175,31 @@ namespace Tests
         public void TestProductSaleByDayNSGetList()
         {
             var repository = GetRepository();
-            var query = QueryFactory.Create<ProductSaleByDayNSEntity>(m =>
-            m.ProductName.Contains("测试")
-            && m.StatisticalDate >= new DateTime(2019, 2, 10) && m.StatisticalDate < new DateTime(2019, 2, 27)
-            );
+
+
+
+            IQuery<ProductSaleByDayNSEntity> query;
+            long c;
+            query = QueryFactory.Create<ProductSaleByDayNSEntity>(m =>
+           m.ProductName.Contains("测试") && !m.ProductName.Contains("不存在")
+           && m.StatisticalDate >= new DateTime(2019, 2, 10) && m.StatisticalDate < new DateTime(2019, 2, 27)
+           );
 
             var q2 = query.Select(m => new ProductSaleByDayNSEntity { SysNo = m.SysNo, BrandID = m.BrandID, ProductName = m.ProductName, StatisticalDate = m.StatisticalDate });
 
             var lst = repository.GetList(q2);
+
             Assert.True(lst.Count > 30);
             Assert.False(lst.Any(m => !(m.ProductName?.Contains("测试")).GetValueOrDefault() || m.StatisticalDate.Year != 2019 || m.StatisticalDate.Month != 2));
-            query = QueryFactory.Create<ProductSaleByDayNSEntity>(m => m.IsExclude && !m.IsExclude && m.ProductName.Contains("你好")
-            && !m.ProductName.Contains("没有") && m.IsExclude == false && m.AveragePrice > 0 && m.AveragePrice == 0 && m.CategoryID == Guid.Empty && true == true);
-
-            var c = repository.Count(query);
-            Assert.True(c == 0);
 
             lst = repository.GetList();
             lst[0].ProductName = "";
             repository.Update(lst[0]);
+
             var all = lst.AsQueryable();
 
             Expression<Func<ProductSaleByDayNSEntity, bool>> where =
-                m => m.ProductName.Contains("测试") && !m.ProductName.Contains("不存在") && m.ProductName.Contains("测试") == true
-                && m.ProductName.Contains("不存在") == false;
+             m => !m.ProductName.Contains("不存在");
 
             var allCount = all.Count(where);
             query = QueryFactory.Create(where);
@@ -204,6 +207,40 @@ namespace Tests
             Assert.AreEqual(allCount, c);
             Assert.AreNotEqual(allCount, 0);
 
+            where =
+             m => m.ProductName.Contains("不存在")||m.ProductName.Contains("测试商品1");
+
+             allCount = all.Count(where);
+            query = QueryFactory.Create(where);
+            c = repository.Count(query);
+            Assert.AreEqual(allCount, c);
+            Assert.AreNotEqual(allCount, 0);
+
+            query = QueryFactory.Create<ProductSaleByDayNSEntity>(m => m.IsExclude && !m.IsExclude && m.ProductName.Contains("你好")
+            && !m.ProductName.Contains("没有") && m.IsExclude == false && m.AveragePrice > 0 && m.AveragePrice == 0 && m.CategoryID == Guid.Empty && true == true);
+
+            c = repository.Count(query);
+            Assert.True(c == 0);
+
+
+
+
+            where =
+                 m => !m.ProductName.Contains("不存在") && m.ProductName.Contains("测试商品1") == true
+                 && m.ProductName.Contains("不存在") == false && m.ProductName.Contains("测试");
+
+            allCount = all.Count(where);
+            query = QueryFactory.Create(where);
+            c = repository.Count(query);
+            Assert.AreEqual(allCount, c);
+            Assert.AreNotEqual(allCount, 0);
+
+            where = m => m.IsExclude == false && m.ProductName.Contains("测试商品1");
+            allCount = all.Count(where);
+            query = QueryFactory.Create(where);
+            c = repository.Count(query);
+            Assert.AreEqual(allCount, c);
+            Assert.AreNotEqual(allCount, 0);
 
             where =
              m => m.Sales + m.NumberOfSales > m.OrderQuantity + m.NumberOfSales && m.Sales > 0;
@@ -356,6 +393,14 @@ namespace Tests
 
         private void TestProductSaleByDayNSAdd()
         {
+            var usersEntity = new UsersEntity
+            {
+                createDate = DateTime.Now,
+                name = "名称",
+                code = "c01"
+            };
+            new UsersRepository().Add(usersEntity);
+            Assert.True(usersEntity.id > 0);
             var addEntity = new ProductSaleByDayNSEntity()
             {
                 SysNo = Guid.NewGuid(),

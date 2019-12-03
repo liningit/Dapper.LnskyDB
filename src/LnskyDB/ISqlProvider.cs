@@ -6,6 +6,9 @@ using System.Text;
 
 namespace LnskyDB
 {
+    /// <summary>
+    /// 数据库提供程序
+    /// </summary>
     public interface ISqlProvider
     {
         DbConnection GetConnection(string connStr);

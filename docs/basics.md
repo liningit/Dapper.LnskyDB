@@ -28,7 +28,7 @@ public override string GetDBModel_TableName() => "Purify_ProductSaleByDay{0}";
 public override string GetDBModel_DBName() => "Lnsky{0}";
 ```
 ### 4.分库分表配置
-GetShuffledModel()` SetShuffledData(object obj)`返回分库分表对象,及实现设置分库分表值.示例:
+` GetShuffledModel()`  `SetShuffledData(object obj)`返回分库分表对象,及实现设置分库分表值.示例:
 ```csharp
 public override ShuffledModel GetShuffledModel()
 {
@@ -44,6 +44,9 @@ public DateTime DBModel_ShuffledTempDate { get { return StatisticalDate != DateT
 
 public override void SetShuffledData(object obj) { DBModel_ShuffledTempDate = (DateTime)obj; }
 ```
+### 5.数据库提供程序
+`GetDBModel_SqlProvider()`返回数据库提供程序返回`MsSqlProvider`或`MySqlProvider`
+
 ## 错误日志
 `DBTool.Error`事件,当执行sql发生异常会触发`DBTool.Error`事件
 
