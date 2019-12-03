@@ -34,4 +34,10 @@
     </Compile>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Entity\LnskyNS\" />
+    <Folder Include="RepositoryInterface\LnskyNS\" />
+    <Folder Include="Repository\LnskyNS\" />
+  </ItemGroup>
+
 </Project>
