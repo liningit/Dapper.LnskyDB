@@ -5,7 +5,7 @@ using System;
 using System.Collections.Immutable;
 namespace LnskyDB.Demo.Entity.Purify
 {
-    public class ProductSaleByDayEntity : BaseDBModel
+   public class ProductSaleByDayEntity : BaseDBModel
     {
 		private static ImmutableList<string> _DBModel_PKCols = ImmutableList.Create("SysNo");
         public override ImmutableList<string> GetDBModel_PKCols() => _DBModel_PKCols;

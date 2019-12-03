@@ -5,7 +5,7 @@ using System;
 using System.Collections.Immutable;
 namespace LnskyDB.Demo.Entity.Data
 {
-    public class ShopEntity : BaseDBModel
+   public class ShopEntity : BaseDBModel
     {
 		private static ImmutableList<string> _DBModel_PKCols = ImmutableList.Create("SysNo");
         public override ImmutableList<string> GetDBModel_PKCols() => _DBModel_PKCols;

@@ -5,7 +5,7 @@ using System;
 using System.Collections.Immutable;
 namespace LnskyDB.Demo.Entity.LnskyNS
 {
-    public class usersEntity : BaseDBModel
+   public class UsersEntity : BaseDBModel
     {
 		private static ImmutableList<string> _DBModel_PKCols = ImmutableList.Create("id");
         public override ImmutableList<string> GetDBModel_PKCols() => _DBModel_PKCols;
@@ -18,7 +18,7 @@ namespace LnskyDB.Demo.Entity.LnskyNS
 		
 		public static ISqlProvider _DBModel_SqlProvider = new MsSqlProvider();
 		public override ISqlProvider GetDBModel_SqlProvider() => _DBModel_SqlProvider;
-        public override string GetDBModel_TableName() => "users{0}";
+        public override string GetDBModel_TableName() => "Users{0}";
         public override string GetDBModel_DBName() => "LnskyNS{0}";
 				
 		#region Model
