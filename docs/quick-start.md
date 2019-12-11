@@ -7,6 +7,9 @@
 
 1. NuGet地址:[https://www.nuget.org/packages/LnskyDB/](https://www.nuget.org/packages/LnskyDB/ "https://www.nuget.org/packages/LnskyDB/")
 
+如果是mysql还需引用 https://www.nuget.org/packages/LnskyDB.MySql/
+
+如果是sql server还需引用 https://www.nuget.org/packages/LnskyDB.MsSql/
 ## 创建数据库
 创建LnskyNS_Test,Lnsky_Test_18,Lnsky_Test_19.三个数据库,其中创建LnskyNS_Test为不分库分表的数据库,另外两个是分库分表的.然后执行 [/src/LnskyDB.Demo/db.sql](https://github.com/liningit/LnskyDB/blob/master/src/LnskyDB.Demo/db.sql "/src/LnskyDB.Demo/db.sql")
 
