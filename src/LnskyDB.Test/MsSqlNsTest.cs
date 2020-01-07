@@ -84,7 +84,7 @@ namespace Tests
 
                     repositoryNSFactory.Delete(QueryFactory.Create<ProductSaleByDayNSEntity>());
                     var tempDate = new DateTime(2018, 1, 1);
-                    while (tempDate <= DateTime.Now.Date)
+                    while (tempDate <= DateTime.Now)
                     {
 
                         foreach (var p in dicProduct)
@@ -208,9 +208,9 @@ namespace Tests
             Assert.AreNotEqual(allCount, 0);
 
             where =
-             m => m.ProductName.Contains("不存在")||m.ProductName.Contains("测试商品1");
+             m => m.ProductName.Contains("不存在") || m.ProductName.Contains("测试商品1");
 
-             allCount = all.Count(where);
+            allCount = all.Count(where);
             query = QueryFactory.Create(where);
             c = repository.Count(query);
             Assert.AreEqual(allCount, c);

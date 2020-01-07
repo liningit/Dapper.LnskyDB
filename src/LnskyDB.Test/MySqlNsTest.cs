@@ -82,7 +82,7 @@ namespace Tests
 
                     repositoryNSFactory.Delete(QueryFactory.Create<ProductSaleByDayNSEntity>());
                     var tempDate = new DateTime(2018, 1, 1);
-                    while (tempDate <= DateTime.Now.Date)
+                    while (tempDate <= DateTime.Now)
                     {
 
                         foreach (var p in dicProduct)

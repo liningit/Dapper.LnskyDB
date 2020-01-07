@@ -67,7 +67,7 @@ namespace Tests
                     var random = new Random();
 
                     var tempDate = new DateTime(2018, 1, 1);
-                    while (tempDate <= DateTime.Now.Date)
+                    while (tempDate <= new DateTime(2019, 12, 31))
                     {
                         if (tempDate.Day == 1)
                         {
@@ -321,7 +321,7 @@ namespace Tests
                 ProductName = "测试商品",
                 OutProductID = Guid.NewGuid().ToString(),
                 ImportGroupId = Guid.NewGuid(),
-                StatisticalDate = DateTime.Now//分库分表字段是必须的
+                StatisticalDate = DateTime.Now.AddYears(2019 - DateTime.Now.Year)//分库分表字段是必须的
             };
             var repository = GetRepository();
             //如果新增主键是自增列会自动赋值自增列值到主键
