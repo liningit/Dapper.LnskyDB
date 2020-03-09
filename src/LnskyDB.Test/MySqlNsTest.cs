@@ -210,7 +210,7 @@ namespace Tests
              m => m.Sales + m.NumberOfSales > m.OrderQuantity + m.NumberOfSales && m.Sales > 0;
 
             allCount = all.Count(where);
-            query = QueryFactory.Create<ProductSaleByDayNSEntity>(where);
+            query = QueryFactory.Create(where);
             c = repository.Count(query);
             Assert.AreEqual(allCount, c);
             Assert.AreNotEqual(allCount, 0);
@@ -229,7 +229,7 @@ namespace Tests
             where =
            m => !string.IsNullOrEmpty(m.ProductName) && !string.IsNullOrEmpty(m.DataSource);
             allCount = all.Count(where);
-            query = QueryFactory.Create<ProductSaleByDayNSEntity>(where);
+            query = QueryFactory.Create(where);
             c = repository.Count(query);
             Assert.AreEqual(allCount, c);
             Assert.AreNotEqual(allCount, 0);
