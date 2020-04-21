@@ -510,6 +510,7 @@ namespace LnskyDB.Test
                 TestProductSaleByDayNSUpdateWhere();
                 TestProductSaleByDayNSDelete();
                 tran.Complete();
+
             }
         }
         #region TestProductSaleByDayNSTransaction
