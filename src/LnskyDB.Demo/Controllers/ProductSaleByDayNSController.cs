@@ -1,5 +1,7 @@
-﻿ 
+﻿
+using LnskyDB.Demo.Entity.Data;
 using LnskyDB.Demo.Entity.Purify;
+using LnskyDB.Demo.Repository.Data;
 using LnskyDB.Demo.Repository.Purify;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -24,7 +26,7 @@ namespace LnskyDB.Demo.Controllers
             {
                 //也可以继承实例化
                 return new ProductSaleByDayNSRepository();
-            }    
+            }
         }
         // GET http://localhost:53277/ProductSaleByDayNS/Get
 
@@ -34,7 +36,7 @@ namespace LnskyDB.Demo.Controllers
 
             var repository = GetRepository();
             var entity = repository.Get(new ProductSaleByDayNSEntity
-            {               
+            {
                 SysNo = sysNo
             });
             if (entity == null)
@@ -43,23 +45,21 @@ namespace LnskyDB.Demo.Controllers
             }
             return entity;
         }
+        [HttpGet]
+        public ActionResult<List<ShopEntity>> GetShopList()
+        {
 
+            var lst = new ShopRepository().GetList(m => m.ShopName == null && m.IsDelete == true);
+            return lst;
+        }
         // GET http://localhost:53277/ProductSaleByDayNS/GetList
         [HttpGet]
         public ActionResult<List<ProductSaleByDayNSEntity>> GetList()
         {
 
-            var stTime = new DateTime(2019, 1, 15);
-            var endTime = new DateTime(2019, 2, 11);
             var repository = GetRepository();
-            var query = QueryFactory.Create<ProductSaleByDayNSEntity>(m => m.ShopName.Contains("测试"));
-            query.And(m => m.StatisticalDate >= stTime);
-            query.And(m => m.StatisticalDate < endTime.Date.AddDays(1));
- 
-            query.OrderByDescing(m => m.StatisticalDate);
-            query.StarSize = 20;
-            query.Rows = 10;
-            var lst = repository.GetList(query);
+
+            var lst = repository.GetList(m => true && m.Sales >= 0 && m.DataSource != "");
 
             return lst;
         }
@@ -71,11 +71,11 @@ namespace LnskyDB.Demo.Controllers
             var stTime = new DateTime(2019, 1, 15);
             var endTime = new DateTime(2019, 2, 11);
             var repository = GetRepository();
-            var query = QueryFactory.Create<ProductSaleByDayNSEntity>(m => m.ShopName.Contains("测试"));
-            query.And(m => m.StatisticalDate >= stTime);
-            query.And(m => m.StatisticalDate < endTime.Date.AddDays(1));
+            var query = QueryFactory.Create<ProductSaleByDayNSEntity>(m => DBFunction.Function<DateTime>("ISNULL", m.UpdateDate, DateTime.Now) > new DateTime(2019, 6, 26));
+
             query.OrderByDescing(m => m.StatisticalDate);
-            query.StarSize = 20;
+            query.OrderByDescing(m => m.Sales + 1);
+            query.StarSize = 5;
             query.Rows = 10;
             var paging = repository.GetPaging(query);
             var count = paging.TotalCount;
@@ -93,7 +93,6 @@ namespace LnskyDB.Demo.Controllers
                 DataSource = "新增测试来源",
                 ProductID = Guid.NewGuid(),
                 ShopID = Guid.NewGuid(),
-                ShopName = "测试店铺",
                 ProductName = "测试商品",
                 OutProductID = Guid.NewGuid().ToString(),
                 ImportGroupId = Guid.NewGuid(),
@@ -111,7 +110,6 @@ namespace LnskyDB.Demo.Controllers
             {
                 SysNo = Guid.Parse("650BC09C-2B9C-467B-A457-8B4853CC1F0F"),
                 DataSource = "测试来源修改",
-                ShopName = "店铺修改",
                 StatisticalDate = new DateTime(2019, 01, 05),
             };
             var repository = GetRepository();
@@ -125,12 +123,11 @@ namespace LnskyDB.Demo.Controllers
             var updateEntity = new ProductSaleByDayNSEntity()
             {
                 DataSource = "测试来源修改",
-                ShopName = "店铺修改Where",
-               
+
             };
             var repository = GetRepository();
             var where = QueryFactory.Create<ProductSaleByDayNSEntity>(m => m.DataSource == "新增测试来源" && m.StatisticalDate > new DateTime(2019, 01, 03));//where是更新条件
-           
+
             return repository.Update(updateEntity, where);
         }
         // http://localhost:53277/ProductSaleByDayNS/Delete
@@ -140,7 +137,7 @@ namespace LnskyDB.Demo.Controllers
 
             var deleteEntity = new ProductSaleByDayNSEntity()
             {
-                SysNo = Guid.Parse("650BC09C-2B9C-467B-A457-8B4853CC1F0F")               
+                SysNo = Guid.Parse("650BC09C-2B9C-467B-A457-8B4853CC1F0F")
             };
             var repository = GetRepository();
             return repository.Delete(deleteEntity);
@@ -156,12 +153,76 @@ namespace LnskyDB.Demo.Controllers
             //QueryiSearch方法表示搜索里面空格表示或+表示且
             //如 导入+手工 自动+生成 表示字段必须同时拥有导入和手工或者自动和生成
             //生成sql是 and ((DataSource like '%导入%' and DataSource like '%手工%') or DataSource like '%自动%' and DataSource like '%生成%')            
-            where.QueryiSearch(m => m.DataSource, "新 修改"); 
+            where.QueryiSearch(m => m.DataSource, "新 修改");
             //注意如果是更新用的是实体类的DBModel_ShuffledTempDate Query中的无效
             return repository.Delete(where);
         }
+        //GET http://localhost:53277/ProductSaleByDayNS/Select
+        [HttpGet]
+        public ActionResult<Paging<ProductSaleByDayNSEntity>> Select()
+        {
+            var repository = GetRepository();
+            var query = QueryFactory.Create<ProductSaleByDayNSEntity>(m => DBFunction.Function<DateTime>("ISNULL", m.UpdateDate, DateTime.Now) > new DateTime(2019, 6, 26));
+            query.OrderBy(m => m.Sales + 1 + m.NumberOfSales);
+            query.OrderByDescing(m => m.ShopID);
+            query.StarSize = 10;
+            query.Rows = 4;
+            //var res1 = query.Select(m => m);
+            //var lst1 = repository.GetPaging(res1);
+            var res2 = query.Select(m => m.SysNo);
+            //var lst2 = repository.GetPaging(res2);
+            //var res3 = query.Select(m => m.Sales + m.AveragePrice + 2);
+            //var lst3 = repository.GetPaging(res3);
 
+            var q = QueryFactory.Create<ProductSaleByDayNSEntity>();
+            q.And(m => m.Sales > 0);
+            q.And(m => res2.Contains(m.SysNo));
 
+            var lst4 = repository.GetPaging(q);
+            return lst4;
+
+        }
+        //GET http://localhost:53277/ProductSaleByDayNS/GetJoinPaging
+        [HttpGet]
+        public ActionResult<object> GetJoinPaging()
+        {
+            var repository = GetRepository();
+            var query = QueryFactory.Create<ProductSaleByDayNSEntity>(m => DBFunction.Function<DateTime>("ISNULL", m.UpdateDate, DateTime.Now) > new DateTime(2019, 6, 26));
+            var jq = query.InnerJoin(QueryFactory.Create<ShopEntity>(), m => m.ShopID, m => m.SysNo, (x, y) => new { Sale = x, Shop = y });
+            jq.And(m => m.Shop.ShopName.Contains("店铺"));
+
+            jq.StarSize = 10;
+            jq.Rows = 5;
+            //也可以下面这样返回dto.第二个参数表示第一个表是否要查询所有列.
+            var res2 = jq.Select(m => new { SysNo = m.Sale.SysNo, BrandID = m.Sale.BrandID }, false);
+            var paging2 = repository.GetPaging(res2);
+
+            return paging2;
+        }
+        //GET http://localhost:53277/ProductSaleByDayNS/GetJoinPaging2
+        [HttpGet]
+        public ActionResult<Paging<ProductSaleByDayNSEntity>> GetJoinPaging2()
+        {
+            var repository = GetRepository();
+            var query = QueryFactory.Create<ProductSaleByDayNSEntity>(m => DBFunction.Function<DateTime>("ISNULL", m.UpdateDate, DateTime.Now) > new DateTime(2019, 6, 26));
+            var jq = query.InnerJoin(QueryFactory.Create<ShopEntity>(), m => m.ShopID, m => m.SysNo, (x, y) => x);
+            jq.And(m => m.DataSource.Contains(""));
+            jq.OrderByDescing(m => m.Sales + 1);
+            jq.OrderBy(m => m.ProductName + m.OutProductID);
+            jq.StarSize = 10;
+            jq.Rows = 5;
+            var res = jq.Select(m => m);
+            var paging = repository.GetPaging(res);
+            //也可以下面这样返回dto.第二个参数表示第一个表是否要查询所有列.
+            var res2 = jq.Select(m => new PSDto { ShopName = m.ProductName }, true);
+            var paging2 = repository.GetPaging(res2);
+
+            var paging3 = repository.GetPaging(jq.Select(m => m.AveragePrice));
+            var paging4 = repository.GetPaging(jq.Select(m => new { m.DataSource, m.AveragePrice }));
+            var count = paging.TotalCount;
+            var lst = paging.ToList();//或者paging.Items
+            return paging;
+        }
         [HttpGet]
         public void TestThread(string shopName, DateTime shuffledTempDate, string dataSource)
         {
@@ -180,7 +241,7 @@ namespace LnskyDB.Demo.Controllers
 
                 var query = QueryFactory.Create<ProductSaleByDayNSEntity>();
                 query.And(m => m.StatisticalDate >= stTime);
-                query.And(m => m.StatisticalDate < stTime.AddDays(3));                
+                query.And(m => m.StatisticalDate < stTime.AddDays(3));
                 //分页查询必须有排序字段
                 query.OrderByDescing(m => m.StatisticalDate);
                 //分库的传入stTime,endTime会自动根据时间查询符合条件的库和表

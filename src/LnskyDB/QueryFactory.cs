@@ -1,4 +1,5 @@
-﻿using LnskyDB.Model;
+﻿using LnskyDB.Internal;
+using LnskyDB.Model;
 using LnskyDB.Tool;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace LnskyDB
             T obj = new T();
             return Create(obj);
         }
-        public static IQuery<T> Create<T>(T obj) where T : BaseDBModel, new()
+        private static IQuery<T> Create<T>(T obj) where T : BaseDBModel, new()
         {
             return new QueryInfo<T>(obj);
         }

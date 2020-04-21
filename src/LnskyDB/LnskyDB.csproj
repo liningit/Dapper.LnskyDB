@@ -3,10 +3,42 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Authors>liningit</Authors>
     <Company />
-    <Description>基于Dapper的Lambda扩展支持按时间分库分表,也可以自定义分库分表方法,且实体类有T4模版自动生成.省去手写实体类的麻烦</Description>
+    <Description>基于Dapper的Lambda扩展支持按时间分库分表,也可以自定义分库分表方法,且实体类有T4模版自动生成.省去手写实体类的麻烦
+v3.1.0
+支持事务了
+v3.0.2
+字段==false解析bug修改
+v3.0.1
+BaseDBModel改为非抽象类
+v3.0.0
+支持mysql数据库
+v2.0.8
+Select支持匿名对象
+v2.0.7
+加入对with()关键字的支持
+v2.0.6
+OuterJoin bug修复
+v2.0.5
+GetList增加无参数接口
+v2.0.4
+BaseDBModel改为非抽象的
+v.2.0.3
+1.where条件为常量如1==2的时候会忽略的bug修改
+2.Repository.GetList支持表达式
+v2.0.2
+修改了分库分表用sql语句查询时报错的bug
+v2.0.1
+1.支持子查询
+2.基础类增加返回是否分库分表方法
+v2.0.0
+1.支持多表联合查询
+2.OrderBy支持表达式及数据库函数
+v1.0.1
+1.Where条件支持两个字段进行加减乘除操作
+2.Where条件支持Sql函数</Description>
     <PackageProjectUrl>https://github.com/liningit/LnskyDB/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/liningit/LnskyDB/</RepositoryUrl>
     <RepositoryType>github</RepositoryType>
@@ -14,10 +46,13 @@
     <PackageReleaseNotes>基于Dapper的Lambda扩展支持按时间分库分表,也可以自定义分库分表方法,且实体类有T4模版自动生成.省去手写实体类的麻烦</PackageReleaseNotes>
     <PackageLicenseUrl>https://licenses.nuget.org/MIT</PackageLicenseUrl>
     <Copyright></Copyright>
+    <Version>3.1.0</Version>
+    <AssemblyVersion>3.1.0.0</AssemblyVersion>
+    <FileVersion>3.1.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="1.60.6" />
+    <PackageReference Include="Dapper" Version="2.0.30" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
   </ItemGroup>

@@ -1,0 +1,206 @@
+﻿<#@ assembly name="System.Core"#><#@ assembly name="EnvDTE"#><#@ import namespace="System.Collections.Generic"#><#@ import namespace="System.IO"#><#@ import namespace="System.Text"#><#@ import namespace="Microsoft.VisualStudio.TextTemplating"#><#@ import namespace="System.Linq"#><#@ import namespace="System.Collections.Generic"#><#@ import namespace="EnvDTE"#><#+
+//定义管理者 manager 实体类
+
+public class Manager
+{
+    //定义一个 block 块，主要是应用在批量生产中
+    public struct Block
+    {
+        public String Name;
+        public bool IsOverride;
+        public int Start, Length;
+    }
+
+    public List<Block> blocks = new List<Block>();
+    public Block currentBlock;
+    public Block footerBlock = new Block();
+    public Block headerBlock = new Block();
+    public ITextTemplatingEngineHost host;
+    public ManagementStrategy strategy;
+    public StringBuilder template;
+    public String OutputPath { get; set; }
+    //构造函数，包含 host主机，模板，输出路径，创建管理策略
+    public Manager(ITextTemplatingEngineHost host, StringBuilder template, bool commonHeader)
+    {
+        this.host = host;
+        this.template = template;
+        OutputPath = String.Empty;
+        strategy = ManagementStrategy.Create(host);
+    }
+    //开辟一个 block 块
+    public void StartBlock(String name, bool isOverride = true)
+    {
+        currentBlock = new Block { Name = name, Start = template.Length, IsOverride = isOverride };
+    }
+
+    public void StartFooter()
+    {
+        footerBlock.Start = template.Length;
+    }
+
+    public void EndFooter()
+    {
+        footerBlock.Length = template.Length - footerBlock.Start;
+    }
+
+    public void StartHeader()
+    {
+        headerBlock.Start = template.Length;
+    }
+
+    public void EndHeader()
+    {
+        headerBlock.Length = template.Length - headerBlock.Start;
+    }
+
+    public void EndBlock()
+    {
+        currentBlock.Length = template.Length - currentBlock.Start;
+        blocks.Add(currentBlock);
+    }
+    //定义进程，用来将所有的 blocks 块执行出来
+    public void Process()
+    {
+        String header = template.ToString(headerBlock.Start, headerBlock.Length);
+        String footer = template.ToString(footerBlock.Start, footerBlock.Length);
+        blocks.Reverse();
+        foreach (Block block in blocks)
+        {//遍历
+         //输出文件 
+            String content = header + template.ToString(block.Start, block.Length) + footer;
+            strategy.CreateFile(block.Name, content, block.IsOverride);
+            template.Remove(block.Start, block.Length);
+        }
+    }
+}
+//定义管理策略类
+public abstract class ManagementStrategy
+{
+    internal static ManagementStrategy Create(ITextTemplatingEngineHost host)
+    {
+        return new VSManagementStrategy(host);
+    }
+
+    internal ManagementStrategy(ITextTemplatingEngineHost host) { }
+
+    internal abstract void CreateFile(String fileName, String content, bool isOverride);
+
+
+}
+
+public class VSManagementStrategy : ManagementStrategy
+{
+    private EnvDTE.Solution solution;
+    ITextTemplatingEngineHost host;
+
+    internal VSManagementStrategy(ITextTemplatingEngineHost host) : base(host)
+    {
+        IServiceProvider hostServiceProvider = (IServiceProvider)host;
+        if (hostServiceProvider == null)
+            throw new ArgumentNullException("Could not obtain hostServiceProvider");
+
+        EnvDTE.DTE dte = (EnvDTE.DTE)hostServiceProvider.GetService(typeof(EnvDTE.DTE));
+        if (dte == null)
+            throw new ArgumentNullException("Could not obtain DTE from host");
+
+        solution = dte.Solution;
+        this.host = host;
+    }
+    //创建文件
+    internal override void CreateFile(String fileName, String content, bool isOverride)
+    {
+        var project = GetProject(fileName);
+        var projectFileName = project.FileName;
+
+        var path = new FileInfo(projectFileName).Directory.Parent.FullName;
+        var fullName = path + "\\" + fileName;
+        var directory = new FileInfo(fullName).Directory;
+        if (!directory.Exists)
+        {
+            directory.Create();
+        }
+        if (!isOverride)
+        {
+            if (File.Exists(fullName))
+            {
+                return;
+            }
+        }
+        File.WriteAllText(fullName, content, new UTF8Encoding(true));
+        var existFile = File.Exists(fullName);
+        if (existFile)
+        {
+            // addedItem = solution.DTE.ItemOperations.OpenFile(fullName).ProjectItem;
+        }
+        else
+        {
+            // addedItem = project.SubProject.ProjectItems.AddFromFile(fullName);
+            //isOpen = addedItem.IsOpen;
+        }
+    }
+
+    Dictionary<string, Project> dic = new Dictionary<string, Project>();
+    private EnvDTE.Project GetProject(string fileName)
+    {
+        var name = fileName.Split(new char[] { '\\', '/' }).FirstOrDefault();
+
+
+        if (dic.ContainsKey(name))
+        {
+            return dic[name];
+        }
+        foreach (var ti in solution.Projects)
+        {
+            var j = ti as EnvDTE.Project;
+            var jn = j.Name;
+            if (j.Name == name)
+            {
+                dic.Add(name, j);
+                return j;
+            }
+            var t = GetProject(j.ProjectItems, name);
+            if (t != null)
+            {
+                dic.Add(name, t.SubProject);
+                return t.SubProject;
+            }
+        }
+        return null;
+
+    }
+
+    private ProjectItem GetProject(ProjectItems projectItems, string name)
+    {
+        if (projectItems == null)
+        {
+            return null;
+        }
+        foreach (var i in projectItems)
+        {
+            var item = i as EnvDTE.ProjectItem;
+            var iname = item.Name;
+            if (item.Name == name)
+            {
+                return item;
+            }
+            if (item.SubProject != null)
+            {
+                var sname = item.SubProject.Name;
+                if (item.SubProject.Name == name)
+                {
+                    return null;
+                }
+                if (item.SubProject.ProjectItems != null)
+                {
+                    var res = GetProject(item.SubProject.ProjectItems, name);
+                    if (res != null)
+                    {
+                        return res;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+}
+#>

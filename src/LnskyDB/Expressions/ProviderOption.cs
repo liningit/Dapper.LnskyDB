@@ -4,8 +4,9 @@ using System.Text;
 
 namespace LnskyDB.Expressions
 {
-    internal class ProviderOption
+    public class ProviderOption
     {
+   
         public ProviderOption(char openQuote, char closeQuote, char parameterPrefix)
         {
             OpenQuote = openQuote;

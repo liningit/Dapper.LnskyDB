@@ -1,18 +1,25 @@
 ﻿using LnskyDB.Model;
+using LnskyDB.MsSql;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Immutable;
 namespace LnskyDB.Demo.Entity.Purify
 {
-    public class ProductSaleByDayEntity : BaseDBModel
+   public class ProductSaleByDayEntity : BaseDBModel
     {
 		private static ImmutableList<string> _DBModel_PKCols = ImmutableList.Create("SysNo");
         public override ImmutableList<string> GetDBModel_PKCols() => _DBModel_PKCols;
  
 		
+		public static ISqlProvider _DBModel_SqlProvider = new MsSqlProvider();
+		public override ISqlProvider GetDBModel_SqlProvider() => _DBModel_SqlProvider;
         public override string GetDBModel_TableName() => "Purify_ProductSaleByDay{0}";
         public override string GetDBModel_DBName() => "Lnsky{0}";
-		
+				
+		/// <summary>
+        /// 是否分库分表
+        /// </summary>
+		public override bool GetDBModel_IsShuffled() => true;
 		/// <summary>
         /// 最小分库分表时间
         /// </summary>

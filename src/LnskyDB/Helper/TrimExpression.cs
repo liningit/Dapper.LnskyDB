@@ -7,11 +7,16 @@ namespace LnskyDB.Helper
 {
     internal class TrimExpression : ExpressionVisitor
     {
-        private bool _isDeep;
-
-        public static Expression Trim(Expression expression)
+        private TrimExpression(bool isWhere)
         {
-            return new TrimExpression().Visit(expression);
+            _isWhere = isWhere;
+        }
+        private bool _isDeep;
+        private bool _isWhere;
+
+        public static Expression Trim(Expression expression, bool isWhere)
+        {
+            return new TrimExpression(isWhere).Visit(expression);
         }
 
         private Expression Sub(Expression expression)
@@ -35,8 +40,9 @@ namespace LnskyDB.Helper
                     else
                     {
                         if (_isDeep)
+                        {
                             return expression;
-
+                        }
                         _isDeep = true;
                         return Expression.Equal(expression, Expression.Constant(true));
                     }
@@ -81,26 +87,34 @@ namespace LnskyDB.Helper
                     _isDeep = true;
                     if (b.Left.NodeType != b.Right.NodeType)
                     {
-                        if (b.Left.NodeType == ExpressionType.MemberAccess && b.Left.Type.Name == "Boolean")
+                        if ((b.Left.NodeType == ExpressionType.MemberAccess || b.Left.NodeType == ExpressionType.Constant) && b.Left.Type.Name == "Boolean")
                         {
                             if (expression.NodeType == ExpressionType.AndAlso)
                                 return Expression.AndAlso(Expression.Equal(b.Left, Expression.Constant(true)), b.Right);
                             if (expression.NodeType == ExpressionType.OrElse)
                                 return Expression.OrElse(Expression.Equal(b.Left, Expression.Constant(true)), b.Right);
                         }
-                        if (b.Right.NodeType == ExpressionType.MemberAccess && b.Right.Type.Name == "Boolean")
+                        if ((b.Right.NodeType == ExpressionType.MemberAccess || b.Right.NodeType == ExpressionType.Constant) && b.Right.Type.Name == "Boolean")
                         {
                             if (expression.NodeType == ExpressionType.AndAlso)
                                 return Expression.AndAlso(b.Left, Expression.Equal(b.Right, Expression.Constant(true)));
                             if (expression.NodeType == ExpressionType.OrElse)
                                 return Expression.OrElse(b.Left, Expression.Equal(b.Right, Expression.Constant(true)));
                         }
-                        if (b.Left.NodeType == ExpressionType.Constant)
-                            return b.Right;
-                        if (b.Right.NodeType == ExpressionType.Constant)
-                            return b.Left;
+                        return b;
                     }
                     break;
+                case ExpressionType.Lambda:
+                    _isDeep = true;
+                    var l = (LambdaExpression)expression;
+                    if (_isWhere)
+                    {
+                        if ((l.Body.NodeType == ExpressionType.MemberAccess || l.Body.NodeType == ExpressionType.Constant) && l.Body.Type.Name == "Boolean")
+                        {
+                            return Expression.Equal(l.Body, Expression.Constant(true));
+                        }
+                    }
+                    return expression;
                 default:
                     _isDeep = true;
                     return expression;

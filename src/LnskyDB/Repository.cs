@@ -5,19 +5,24 @@ using Dapper;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using LnskyDB.Internal;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Linq;
+using System.Data;
 
 namespace LnskyDB
 {
-    public abstract class Repository<T> : BaseRepository<T> where T : BaseDBModel, new()
+    public abstract class Repository<T> : AbstractRepository<T> where T : BaseDBModel, new()
     {
         public Repository() : base(new T()) { }
     }
-    public abstract class BaseRepository<T> : IRepository<T> where T : BaseDBModel
+    public abstract class AbstractRepository<T> : IRepository<T> where T : BaseDBModel, new()
     {
         private T dbModel = null;
-        internal BaseRepository(T obj)
+        internal AbstractRepository(T obj)
         {
-            dbModel = obj ?? throw new Exception("对象不可为空");
+            dbModel = obj ?? throw new LnskyDBException("对象不可为空");
 
         }
         public int? CommandTimeout { get; set; }
@@ -27,12 +32,8 @@ namespace LnskyDB
             if (obj == null)
             {
                 obj = dbModel;
-                if (obj.GetShuffledModel() != ShuffledModel.Empty)
-                {
-                    throw new NoShuffledException(obj.GetDBModel_TableName(), "分库分表对象");
-                }
             }
-            return DBTool.GetConnection(obj.GetDBModel_DBName(), obj.GetShuffledModel());
+            return DBTool.GetConnection(obj);
 
         }
         public List<T> GetList(IQuery<T> query)
@@ -41,7 +42,7 @@ namespace LnskyDB
         }
         public List<R> GetList<R>(IQuery<T> query)
         {
-            return GetConn(query.DBModel).GetList<R, T>(query: query, commandTimeout: CommandTimeout);
+            return GetList(GetConn(query.DBModel).GetList<R, T>(query: query, commandTimeout: CommandTimeout));
         }
         public long Count(IQuery<T> query)
         {
@@ -59,7 +60,7 @@ namespace LnskyDB
         {
             var conn = GetConn(query.DBModel);
             var count = conn.Count(query: query, commandTimeout: CommandTimeout);
-            List<R> lst = count == 0 ? new List<R>() : conn.GetList<R, T>(query: query, commandTimeout: CommandTimeout);
+            List<R> lst = count == 0 ? new List<R>() : GetList(conn.GetList<R, T>(query: query, commandTimeout: CommandTimeout));
             return new Paging<R>(count, lst);
         }
         public T Get(T obj)
@@ -75,6 +76,11 @@ namespace LnskyDB
         {
             return GetConn(obj).Update(obj: obj, where: where, commandTimeout: CommandTimeout);
         }
+        public int Update(T obj, Expression<Func<T, bool>> predicate)
+        {
+            var where = QueryFactory.Create(predicate);
+            return Update(obj, where);
+        }
         public bool Delete(T obj)
         {
             return GetConn(obj).Delete(obj: obj, commandTimeout: CommandTimeout);
@@ -82,6 +88,11 @@ namespace LnskyDB
         public int Delete(IQuery<T> where)
         {
             return GetConn(where.DBModel).Delete(where: where, commandTimeout: CommandTimeout);
+        }
+        public int Delete(Expression<Func<T, bool>> predicate)
+        {
+            var where = QueryFactory.Create(predicate);
+            return Delete(where);
         }
         public void Add(T obj)
         {
@@ -91,55 +102,105 @@ namespace LnskyDB
 
         public List<T> GetList(string sql, object par)
         {
-            return GetConn(null).Query<T>(sql: sql, param: par, commandTimeout: CommandTimeout).AsList();
+            var conn = GetConn(null);
+            var lst = conn.Query<T>(sql: sql, param: par, commandTimeout: CommandTimeout, transaction: DBTool.GetTransaction(conn));
+            return GetList(lst);
         }
 
         public List<R> GetList<R>(string sql, object par)
         {
-            return GetConn(null).Query<R>(sql: sql, param: par, commandTimeout: CommandTimeout).AsList();
+            var conn = GetConn(null);
+            var lst = conn.Query<R>(sql: sql, param: par, commandTimeout: CommandTimeout, transaction: DBTool.GetTransaction(conn));
+            return GetList(lst);
         }
 
         public T Get(string sql, object par)
         {
-            return GetConn(null).QueryFirstOrDefault<T>(sql: sql, param: par, commandTimeout: CommandTimeout);
+            var conn = GetConn(null);
+            return conn.QueryFirstOrDefault<T>(sql: sql, param: par, commandTimeout: CommandTimeout, transaction: DBTool.GetTransaction(conn));
         }
 
         public R Get<R>(string sql, object par)
         {
-            return GetConn(null).QueryFirstOrDefault<R>(sql: sql, param: par, commandTimeout: CommandTimeout);
+            var conn = GetConn(null);
+            return conn.QueryFirstOrDefault<R>(sql: sql, param: par, commandTimeout: CommandTimeout, transaction: DBTool.GetTransaction(conn));
         }
 
         public int Execute(string sql, object par)
         {
-            return GetConn(null).Execute(sql: sql, param: par, commandTimeout: CommandTimeout);
+            var conn = GetConn(null);
+            return conn.Execute(sql: sql, param: par, commandTimeout: CommandTimeout, transaction: DBTool.GetTransaction(conn));
         }
 
         public List<T> GetList(T obj, string sql, object par)
         {
-            return GetConn(obj).Query<T>(sql: sql, param: par, commandTimeout: CommandTimeout).AsList();
+            var conn = GetConn(obj);
+            return GetList(conn.Query<T>(sql: sql, param: par, commandTimeout: CommandTimeout, transaction: DBTool.GetTransaction(conn)));
         }
 
         public List<R> GetList<R>(T obj, string sql, object par)
         {
-            return GetConn(obj).Query<R>(sql: sql, param: par, commandTimeout: CommandTimeout).AsList();
+            var conn = GetConn(obj);
+            return GetList(conn.Query<R>(sql: sql, param: par, commandTimeout: CommandTimeout, transaction: DBTool.GetTransaction(conn)));
+        }
+
+        public List<R> GetList<R>(ISelectResult<R> query)
+        {
+            Type typeFromHandle = typeof(R);
+            ConstructorInfo right = typeFromHandle.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).FirstOrDefault((ConstructorInfo x) => x.GetParameters().Length == 0);
+            var conn = GetConn(query.DBModel as T);
+            if (null == right && typeFromHandle.FullName.Contains("AnonymousType"))
+            {
+                using (IDataReader reader = conn.ExecuteReader(sql: query.SqlCmd, param: query.Param, commandTimeout: CommandTimeout, transaction: DBTool.GetTransaction(conn)))
+                {
+                    return GetList(reader.Parse<R>().ToList());
+                }
+            }
+
+            return GetList(conn.Query<R>(sql: query.SqlCmd, param: query.Param, commandTimeout: CommandTimeout, transaction: DBTool.GetTransaction(conn)));
+        }
+        public Paging<R> GetPaging<R>(ISelectResult<R> query)
+        {
+
+            var lst = GetList(query);
+            var conn = GetConn(null);
+            var count = conn.QuerySingleOrDefault<long>(sql: query.CountSqlCmd, param: query.Param, commandTimeout: CommandTimeout, transaction: DBTool.GetTransaction(conn));
+            return new Paging<R>(count, lst);
+        }
+
+        private List<R> GetList<R>(IEnumerable<R> lst)
+        {
+            if (typeof(BaseDBModel).IsAssignableFrom(typeof(R)))
+            {
+                foreach (var t in lst)
+                {
+                    var b = t as BaseDBModel;
+                    b.GetDBModel_ChangeList().Clear();
+                    b.BeginChange();
+                }
+            }
+            return lst.AsList();
         }
 
         public T Get(T obj, string sql, object par)
         {
-            return GetConn(obj).QueryFirstOrDefault<T>(sql: sql, param: par, commandTimeout: CommandTimeout);
+            var conn = GetConn(obj);
+            return conn.QueryFirstOrDefault<T>(sql: sql, param: par, commandTimeout: CommandTimeout, transaction: DBTool.GetTransaction(conn));
         }
 
         public R Get<R>(T obj, string sql, object par)
         {
-            return GetConn(obj).QueryFirstOrDefault<R>(sql: sql, param: par, commandTimeout: CommandTimeout);
+            var conn = GetConn(obj);
+            return conn.QueryFirstOrDefault<R>(sql: sql, param: par, commandTimeout: CommandTimeout, transaction: DBTool.GetTransaction(conn));
         }
 
         public int Execute(T obj, string sql, object par)
         {
-            return GetConn(obj).Execute(sql: sql, param: par, commandTimeout: CommandTimeout);
+            var conn = GetConn(obj);
+            return conn.Execute(sql: sql, param: par, commandTimeout: CommandTimeout, transaction: DBTool.GetTransaction(conn));
         }
 
-        public Paging<T> GetPaging(IQuery<T> query, DateTime stTime, DateTime endime)
+        public virtual Paging<T> GetPaging(IQuery<T> query, DateTime stTime, DateTime endime)
         {
             var res = GetList(query, stTime, endime, true);
             return new Paging<T>(res.TotalCount, res.List);
@@ -190,11 +251,25 @@ namespace LnskyDB
             return (res, totalCount);
         }
 
-        public List<T> GetList(IQuery<T> query, DateTime stTime, DateTime endime)
+        public virtual List<T> GetList(IQuery<T> query, DateTime stTime, DateTime endime)
         {
             var res = GetList(query, stTime, endime, false);
             return res.List;
 
         }
+        public List<T> GetList(Expression<Func<T, bool>> predicate)
+        {
+            var query = QueryFactory.Create(predicate);
+            return GetList(query);
+        }
+        public List<T> GetList()
+        {
+            var query = QueryFactory.Create<T>();
+            return GetList(query);
+        }
+
+
+
+
     }
 }

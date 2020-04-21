@@ -1,0 +1,136 @@
+﻿<#@ template language="C#" debug="false" hostspecific="true"#> 
+<#@ assembly name="System.Core.dll" #>
+<#@ assembly name="System.Data.dll" #>
+<#@ assembly name="System.Data.DataSetExtensions.dll" #>
+<#@ assembly name="System.Xml.dll" #>
+<#@ assembly name="$(ProjectDir)\PublicDll\MySql.Data.dll" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Xml" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Linq.Expressions" #>
+<#@ import namespace="System.Data" #>
+<#@ import namespace="System.Data.SqlClient" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="MySql.Data.MySqlClient" #>
+<#@ include file="$(ProjectDir)MySqlT4/Manager.ttinclude"	#>
+<#@ include file="$(ProjectDir)MySqlT4/DbHelper.ttinclude"	#>
+<#@ output extension=".cs"#>
+<#  
+	var OutputPath1 = Host.ResolveAssemblyReference("$(SolutionDir)");
+	var manager = new Manager(Host, GenerationEnvironment, true) { OutputPath = OutputPath1 }; 
+
+#>
+<#  
+	GenerationEnvironment.Clear();
+	foreach(var tableInfo in Tool.GetTableInfos())
+	{		 
+		manager.StartBlock("LnskyDB.Test\\MySql\\Entity\\"+tableInfo.TablePre+"\\"+tableInfo.TableName+"Entity.cs");
+#>
+using LnskyDB.Model;
+using LnskyDB.MySql;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Immutable;
+namespace LnskyDB.Test.MySql.Entity.<#=tableInfo.TablePre #>
+{
+    public class <#=tableInfo.TableName #>Entity : BaseDBModel
+    {
+		private static ImmutableList<string> _DBModel_PKCols = ImmutableList.Create("<#=string.Join("\",\"", tableInfo.PKCols)#>");
+        public override ImmutableList<string> GetDBModel_PKCols() => _DBModel_PKCols;
+ 
+		<# if(!string.IsNullOrEmpty(tableInfo.IncrementCol))
+		{#>public override string GetDBModel_IncrementCol() =>  <#="\"" + tableInfo.IncrementCol + "\"" #>;
+		public override void SetIncrementValue(int value)
+		{
+			<#=tableInfo.IncrementCol??""#>=value;
+		}
+		<#}#>
+
+		public static ISqlProvider _DBModel_SqlProvider = new MySqlProvider();
+		public override ISqlProvider GetDBModel_SqlProvider() => _DBModel_SqlProvider;
+        public override string GetDBModel_TableName() => "<#=tableInfo.DBModel_TableName #>{0}";
+        public override string GetDBModel_DBName() => "<#= tableInfo.DatabaseName #>{0}";
+				<#if (tableInfo.ShuffledConfig != null)
+        {		   
+		   var shuffledDataCol=  tableInfo.Columns.Where(m => m.ColumnName==tableInfo.ShuffledConfig.ShuffledData).FirstOrDefault();
+		#>
+
+		/// <summary>
+        /// 是否分库分表
+        /// </summary>
+		public override bool GetDBModel_IsShuffled() => true;
+		/// <summary>
+        /// 最小分库分表时间
+        /// </summary>
+        public static DateTime MinShuffledTempDate { get; } = new DateTime(<#=tableInfo.ShuffledConfig.MinShuffledTempDate.Year #>, <#=tableInfo.ShuffledConfig.MinShuffledTempDate.Month #>, <#=tableInfo.ShuffledConfig.MinShuffledTempDate.Day #>);
+        /// <summary>
+        /// 获取分库分表信息,如果没有分库分表则可以不重写
+        /// </summary>
+        /// <returns></returns>
+        public override ShuffledModel GetShuffledModel()
+        {
+            if (DBModel_ShuffledTempDate == DateTime.MinValue)
+            {
+                throw new NoShuffledException(GetDBModel_TableName(), "分库分表时间,ShuffledTempDate");
+            }
+            return ShuffledByDbTable(DBModel_ShuffledTempDate);
+        }
+
+        DateTime _DBModel_ShuffledTempDate;
+
+        [JsonIgnore]
+        public DateTime DBModel_ShuffledTempDate { get { return <#= tableInfo.ShuffledConfig.ShuffledData#> != DateTime.MinValue ? <#= tableInfo.ShuffledConfig.ShuffledData#><#= shuffledDataCol.IsNullable?" ?? _DBModel_ShuffledTempDate":""
+		#> : _DBModel_ShuffledTempDate; } set { _DBModel_ShuffledTempDate = value; } }
+
+        public override void SetShuffledData(object obj) { DBModel_ShuffledTempDate = (DateTime)obj; }
+		<#}#>
+
+		#region Model
+		<# foreach(DbColumn column in tableInfo.Columns){#>
+
+		<#= column.CSharpType#> _<#=column.ColumnName#>;
+		/// <summary>
+		/// <#=column.Remark#>
+		/// </summary>		
+		public <#= column.CSharpType#> <#=column.ColumnName#> { get { return _<#=column.ColumnName#>; } set { Change("<#=column.ColumnName#>"); _<#=column.ColumnName#> = value; } }
+		<#}#>
+
+		#endregion Model
+	}
+}
+<# 
+		manager.EndBlock();
+		manager.StartBlock("LnskyDB.Test\\MySql\\RepositoryInterface\\"+tableInfo.TablePre+"\\I"+tableInfo.TableName+"Repository.cs",false);
+#>
+using LnskyDB;
+using LnskyDB.Test.MySql.Entity.<#=tableInfo.TablePre #>;
+
+namespace LnskyDB.Test.MySql.RepositoryInterface.<#=tableInfo.TablePre #>
+{
+    public interface I<#=tableInfo.TableName #>Repository : IRepository<<#=tableInfo.TableName #>Entity>
+    {
+    }
+}
+<# 
+		manager.EndBlock();
+		manager.StartBlock("LnskyDB.Test\\MySql\\Repository\\"+tableInfo.TablePre+"\\"+tableInfo.TableName+"Repository.cs",false);
+#>
+using LnskyDB;
+using LnskyDB.Test.MySql.Entity.<#=tableInfo.TablePre #>;
+using LnskyDB.Test.MySql.RepositoryInterface.<#=tableInfo.TablePre #>;
+
+namespace LnskyDB.Test.MySql.Repository.<#=tableInfo.TablePre #>
+{
+    public class <#=tableInfo.TableName #>Repository : Repository<<#=tableInfo.TableName #>Entity>, I<#=tableInfo.TableName #>Repository
+    {
+    }
+}
+
+<# 
+		manager.EndBlock();		
+#>
+<#     }
+	manager.Process();
+#>
+

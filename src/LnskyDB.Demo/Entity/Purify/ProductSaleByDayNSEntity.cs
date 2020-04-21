@@ -1,18 +1,21 @@
 ﻿using LnskyDB.Model;
+using LnskyDB.MsSql;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Immutable;
 namespace LnskyDB.Demo.Entity.Purify
 {
-    public class ProductSaleByDayNSEntity : BaseDBModel
+   public class ProductSaleByDayNSEntity : BaseDBModel
     {
 		private static ImmutableList<string> _DBModel_PKCols = ImmutableList.Create("SysNo");
         public override ImmutableList<string> GetDBModel_PKCols() => _DBModel_PKCols;
  
 		
+		public static ISqlProvider _DBModel_SqlProvider = new MsSqlProvider();
+		public override ISqlProvider GetDBModel_SqlProvider() => _DBModel_SqlProvider;
         public override string GetDBModel_TableName() => "Purify_ProductSaleByDayNS{0}";
         public override string GetDBModel_DBName() => "LnskyNS{0}";
-		
+				
 		#region Model
 		
 		Guid _SysNo;
@@ -62,12 +65,6 @@ namespace LnskyDB.Demo.Entity.Purify
 		/// 店铺ID
 		/// </summary>		
 		public Guid ShopID { get { return _ShopID; } set { Change("ShopID"); _ShopID = value; } }
-		
-		string _ShopName;
-		/// <summary>
-		/// 店铺名称
-		/// </summary>		
-		public string ShopName { get { return _ShopName; } set { Change("ShopName"); _ShopName = value; } }
 		
 		DateTime _StatisticalDate;
 		/// <summary>

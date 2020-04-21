@@ -6,7 +6,13 @@ LnskyDB是基于Dapper的Lambda扩展,支持按时间分库分表,也可以自�
 
 开源地址: https://github.com/liningit/LnskyDB
 
-nuget地址: https://www.nuget.org/packages/LnskyDB/
+nuget地址: 
+
+https://www.nuget.org/packages/LnskyDB/
+
+https://www.nuget.org/packages/LnskyDB.MsSql/
+
+https://www.nuget.org/packages/LnskyDB.MySql/
 
 在此非常感谢SkyChenSky其中lambda表达式的解析参考了他的开源项目
 
@@ -23,9 +29,6 @@ nuget地址: https://www.nuget.org/packages/LnskyDB/
 - **使用门槛低,快速上手**<br>
   使用非常简单,可以快速上手
 
-## 注意问题
-本框架只支持单表的Lambda表达式查询,如果多表需要手写sql,框架支持根据sql查询修改等.
-另外不太建议连表查询,推荐在逻辑层处理
 
 ## 开源协议
 [MIT license.](https://github.com/liningit/LnskyDB/blob/master/LICENSE)
