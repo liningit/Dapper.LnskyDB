@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using LnskyDB.Model;
 
-namespace Tests
+namespace LnskyDB.Test
 {
     public class MsSqlTest
     {
@@ -56,44 +56,48 @@ namespace Tests
                 isRuning = true;
                 try
                 {
-                    var repositoryFactory = RepositoryFactory.Create<ProductSaleByDayEntity>();
-                    var query = QueryFactory.Create<ProductSaleByDayEntity>(m => m.CreateDate > DateTime.Now.Date);
-                    query.DBModel.DBModel_ShuffledTempDate = new DateTime(2019, 09, 01);
-                    if (repositoryFactory.GetList(query).Count > 10)
+                    using (var tran = DBTool.BeginTransaction())
                     {
-                        return "";
-                    }
-                    var importGroupId = Guid.NewGuid();
-                    var random = new Random();
-
-                    var tempDate = new DateTime(2018, 1, 1);
-                    while (tempDate <= new DateTime(2019, 12, 31))
-                    {
-                        if (tempDate.Day == 1)
+                        var repositoryFactory = RepositoryFactory.Create<ProductSaleByDayEntity>();
+                        var query = QueryFactory.Create<ProductSaleByDayEntity>(m => m.CreateDate > DateTime.Now.Date);
+                        query.DBModel.DBModel_ShuffledTempDate = new DateTime(2019, 09, 01);
+                        if (repositoryFactory.GetList(query).Count > 10)
                         {
-                            query = QueryFactory.Create<ProductSaleByDayEntity>();
-                            query.DBModel.DBModel_ShuffledTempDate = tempDate;
-                            repositoryFactory.Delete(query);
+                            return "";
                         }
-                        foreach (var p in dicProduct)
+                        var importGroupId = Guid.NewGuid();
+                        var random = new Random();
+
+                        var tempDate = new DateTime(2018, 1, 1);
+                        while (tempDate <= new DateTime(2019, 12, 31))
                         {
-                            var temp = new ProductSaleByDayEntity();
+                            if (tempDate.Day == 1)
+                            {
+                                query = QueryFactory.Create<ProductSaleByDayEntity>();
+                                query.DBModel.DBModel_ShuffledTempDate = tempDate;
+                                repositoryFactory.Delete(query);
+                            }
+                            foreach (var p in dicProduct)
+                            {
+                                var temp = new ProductSaleByDayEntity();
 
-                            temp.SysNo = Guid.NewGuid();
-                            temp.DataSource = lstDataSource[random.Next(lstDataSource.Count)];
-                            temp.ShopName = "测试店铺";
-                            temp.ProductID = p.Key;
-                            temp.OutProductID = p.Value;
-                            temp.ProductName = p.Value;
-                            temp.Sales = random.Next(100000);
-                            temp.StatisticalDate = tempDate;
-                            temp.UpdateDate = temp.CreateDate = DateTime.Now;
-                            temp.UpdateUserID = temp.CreateUserID = Guid.NewGuid();
-                            temp.ImportGroupId = importGroupId;
-                            repositoryFactory.Add(temp);
+                                temp.SysNo = Guid.NewGuid();
+                                temp.DataSource = lstDataSource[random.Next(lstDataSource.Count)];
+                                temp.ShopName = "测试店铺";
+                                temp.ProductID = p.Key;
+                                temp.OutProductID = p.Value;
+                                temp.ProductName = p.Value;
+                                temp.Sales = random.Next(100000);
+                                temp.StatisticalDate = tempDate;
+                                temp.UpdateDate = temp.CreateDate = DateTime.Now;
+                                temp.UpdateUserID = temp.CreateUserID = Guid.NewGuid();
+                                temp.ImportGroupId = importGroupId;
+                                repositoryFactory.Add(temp);
 
+                            }
+                            tempDate = tempDate.AddDays(1);
                         }
-                        tempDate = tempDate.AddDays(1);
+                        tran.Complete();
                     }
                 }
                 finally
@@ -125,31 +129,41 @@ namespace Tests
         [Test]
         public void TestProductSaleByDayGet()
         {
+            TestProductSaleByDayGet(new DateTime(2019, 01, 01));
+            TestProductSaleByDayGet(new DateTime(2018, 02, 01));
+        }
 
+        private static void TestProductSaleByDayGet(DateTime dt)
+        {
             var repository = GetRepository();
             var query = QueryFactory.Create<ProductSaleByDayEntity>();
             query.OrderBy(m => m.StatisticalDate);
             query.StarSize = 11;
             query.Rows = 1;
-            query.DBModel.DBModel_ShuffledTempDate = new DateTime(2019, 01, 01);
+            query.DBModel.DBModel_ShuffledTempDate = dt;
             var model = repository.GetPaging(query).ToList()[0];
             var entity = repository.Get(new ProductSaleByDayEntity
             {
-                DBModel_ShuffledTempDate = new DateTime(2019, 01, 01),//这儿表示差19年1月的库和表
+                DBModel_ShuffledTempDate = dt,//这儿表示差19年1月的库和表
                 SysNo = model.SysNo
             });
+            Assert.AreEqual(model.StatisticalDate.Year,dt.Year);
+            Assert.AreEqual(model.StatisticalDate.Month,dt.Month);
             Assert.NotNull(entity);
             Assert.AreEqual(model.SysNo, entity.SysNo);
             Assert.AreEqual(model.ShopName, entity.ShopName);
-            entity = repository.Get<ProductSaleByDayEntity>(model, "select * from Purify_ProductSaleByDay_01 where SysNo=@SysNo", new { model.SysNo });
+            Assert.AreEqual(model.StatisticalDate, entity.StatisticalDate);
+
+            entity = repository.Get<ProductSaleByDayEntity>(model, $"select * from Purify_ProductSaleByDay_{dt.Month.ToString("00")} where SysNo=@SysNo", new { model.SysNo });
             Assert.NotNull(entity);
             Assert.AreEqual(model.SysNo, entity.SysNo);
             Assert.AreEqual(model.ShopName, entity.ShopName);
-            entity = repository.Get(model, "select * from Purify_ProductSaleByDay_01 where SysNo=@SysNo", new { model.SysNo });
+            entity = repository.Get(model, $"select * from Purify_ProductSaleByDay_{dt.Month.ToString("00")} where SysNo=@SysNo", new { model.SysNo });
             Assert.NotNull(entity);
             Assert.AreEqual(model.SysNo, entity.SysNo);
             Assert.AreEqual(model.ShopName, entity.ShopName);
         }
+
         [Test]
         public void TestProductSaleByDayGetList()
         {
@@ -364,10 +378,65 @@ namespace Tests
             Assert.AreEqual(model.ProductName, entity.ProductName);
         }
         [Test]
-        public void TestProductSaleByDayUpdateWhere()
+        public void TestProductSaleByDayAddUpdate()
         {
             TestProductSaleByDayAdd();
             TestProductSaleByDayUpdate();
+            TestProductSaleByDayUpdateWhere();
+            TestProductSaleByDayDelete();
+        }
+        public void TestProductSaleByDayDelete()
+        {
+            var repository = GetRepository();
+            var query = QueryFactory.Create<ProductSaleByDayEntity>();
+            query.And(m => !m.DataSource.Contains("修改"));
+            query.OrderByDescing(m => m.StatisticalDate);
+            query.StarSize = new Random().Next(5);
+            query.Rows = 1;
+            query.DBModel.DBModel_ShuffledTempDate = new DateTime(2019, 01, 05);
+            var model = repository.GetPaging(query).ToList()[0];
+            var qm = repository.Get(new ProductSaleByDayEntity
+            {
+                SysNo = model.SysNo,
+                DBModel_ShuffledTempDate = new DateTime(2019, 01, 05)
+            });
+            Assert.NotNull(qm);
+            var res = repository.Delete(model);
+            Assert.True(res);
+            qm = repository.Get(new ProductSaleByDayEntity
+            {
+                SysNo = model.SysNo,
+                DBModel_ShuffledTempDate = new DateTime(2019, 01, 05)
+            });
+            Assert.Null(qm);
+            model = repository.GetPaging(query).ToList()[0];
+            qm = repository.Get(new ProductSaleByDayEntity
+            {
+                SysNo = model.SysNo,
+                DBModel_ShuffledTempDate = new DateTime(2019, 01, 05)
+            });
+            Assert.NotNull(qm);
+            res = repository.Delete(new ProductSaleByDayEntity
+            {
+                SysNo = model.SysNo,
+                DBModel_ShuffledTempDate = new DateTime(2019, 01, 05)
+            });
+            Assert.True(res);
+            qm = repository.Get(new ProductSaleByDayEntity
+            {
+                SysNo = model.SysNo,
+                DBModel_ShuffledTempDate = new DateTime(2019, 01, 05)
+            });
+            Assert.Null(qm);
+            var delQuery = QueryFactory.Create<ProductSaleByDayEntity>(m => m.DataSource == "测试来源批量修改");
+            delQuery.DBModel.DBModel_ShuffledTempDate = new DateTime(2019, 01, 05);
+            var deleteCount = repository.Delete(delQuery);
+            Assert.True(deleteCount > 0);
+
+        }
+        public void TestProductSaleByDayUpdateWhere()
+        {
+
             var repository = GetRepository();
             var queryCount = QueryFactory.Create<ProductSaleByDayEntity>(m => !m.ProductName.Contains("没有") && m.ProductName.Contains("修改"));
 
@@ -386,6 +455,21 @@ namespace Tests
             int updateCount = repository.Update(updateEntity, where);
             Assert.AreEqual(updateCount, count);
             Assert.AreNotEqual(updateCount, 0);
+
+        }
+
+
+        [Test]
+        public void TestProductSaleByDayNSTransaction()
+        {
+            using (var tran = DBTool.BeginTransaction())
+            {
+                TestProductSaleByDayGet();
+                TestProductSaleByDayGetList();
+                TestProductSaleByDayGetPaging();
+                TestProductSaleByDayAddUpdate();
+                tran.Complete();
+            }
 
         }
         [TearDown]

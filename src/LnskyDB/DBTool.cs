@@ -18,18 +18,18 @@ using Microsoft.AspNetCore.Http;
 using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using static LnskyDB.LnskyDBExtensions;
+using LnskyDB.Internal;
 
 namespace LnskyDB
 {
     public class DBTool
     {
-        public static string LnskyDBConnLstThreadId { get; } = "LnskyDBConnLst";
-
         public static event LnskyDBEventHandler<LnskyDBErrorArgs> Error;
         /// <summary>
         /// ThreadStatic表示每个线程都是独立对象
         /// </summary>
         [ThreadStatic] private static LnskyDBConnLst ThreadLnskyDBConnLst;
+        [ThreadStatic] private static ILnskyDBTransactionMain ThreadLnskyDBTransaction;
 
         /// <summary>
         /// 获取当前请求的数据库连接列表
@@ -45,8 +45,24 @@ namespace LnskyDB
                 var url = HttpContext.HttpContext.Request;
                 return HttpContext.HttpContext.RequestServices.GetService<LnskyDBConnLst>();
             }
-            throw new Exception("没有取到ConnLst");
+            throw new LnskyDBException("没有取到ConnLst");
 
+        }
+        /// <summary>
+        /// 获取数据库事务主要控制类
+        /// </summary> 
+        public static ILnskyDBTransactionMain GetLnskyDBTransactionMain()
+        {
+            if (ThreadLnskyDBTransaction != null)
+            {
+                return ThreadLnskyDBTransaction;
+            }
+            if (HttpContext?.HttpContext != null && HttpContext.HttpContext.RequestServices != null)
+            {
+                var url = HttpContext.HttpContext.Request;
+                return HttpContext.HttpContext.RequestServices.GetService<ILnskyDBTransactionMain>();
+            }
+            throw new LnskyDBException("没有取到LnskyDBTransactionMain");
         }
         /// <summary>
         /// 当在线程中使用时要在开始调用
@@ -54,6 +70,46 @@ namespace LnskyDB
         public static void BeginThread()
         {
             ThreadLnskyDBConnLst = new LnskyDBConnLst();
+            ThreadLnskyDBTransaction = new LnskyDBTransactionMain();
+        }
+        /// <summary>
+        /// 开启事务
+        /// </summary> 
+        public static ILnskyDBTransaction BeginTransaction()
+        {
+            var tran = GetLnskyDBTransactionMain();
+            return tran.BeginTransaction();
+        }
+        /// <summary>
+        /// 开启事务
+        /// </summary> 
+        public static ILnskyDBTransaction BeginTransaction(IsolationLevel isolationLevel)
+        {
+            var tran = GetLnskyDBTransactionMain();
+            return tran.BeginTransaction(isolationLevel);
+
+        }
+        /// <summary>
+        /// 返回数据库事务
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <returns></returns>
+        internal static IDbTransaction GetTransaction(DbConnection conn)
+        {
+            var tran = GetLnskyDBTransactionMain();
+            if (!tran.IsBeginTransaction)
+            {
+                return null;
+            }
+            tran.TransactionDic.TryGetValue(conn, out var dbtran);
+            if (dbtran == null)
+            {
+                dbtran = tran.IsolationLevel.HasValue ? conn.BeginTransaction(tran.IsolationLevel.Value) : conn.BeginTransaction();
+                tran.TransactionDic.Add(conn, dbtran);
+
+            }
+            return dbtran;
+
         }
         /// <summary>
         /// 关闭当前请求的连接
@@ -94,7 +150,7 @@ namespace LnskyDB
         {
             if (obj == null)
             {
-                throw new Exception("对象不可为空");
+                throw new LnskyDBException("对象不可为空");
             }
             return GetConnection(obj.GetDBModel_SqlProvider(), obj.GetDBModel_DBName(), obj.GetShuffledModel());
         }
@@ -162,6 +218,9 @@ namespace LnskyDB
                 Error(new LnskyDBErrorArgs { Exception = e, LogInfo = v });
             }
         }
+
+
+
         /// <summary>
         /// 将中文加号等转换成英文
         /// </summary>

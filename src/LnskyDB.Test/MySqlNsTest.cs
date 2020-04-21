@@ -10,7 +10,7 @@ using System.Linq.Expressions;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Tests
+namespace LnskyDB.Test
 {
     public class MySqlNsTest
     {
@@ -64,17 +64,20 @@ namespace Tests
                     shopRepository.Delete(QueryFactory.Create<ShopEntity>());
                     for (int i = 0; i < 10; i++)
                     {
-
-
-                        var shop = new ShopEntity
+                        using (var tran = DBTool.BeginTransaction())
                         {
-                            SysNo = Guid.NewGuid().ToString(),
-                            ShopCode = "00" + i,
-                            ShopName = "²âÊÔµêÆÌ" + i,
-                            ShopType = i % 3,
-                            IsDelete = false,
-                        };
-                        shopRepository.Add(shop);
+
+                            var shop = new ShopEntity
+                            {
+                                SysNo = Guid.NewGuid().ToString(),
+                                ShopCode = "00" + i,
+                                ShopName = "²âÊÔµêÆÌ" + i,
+                                ShopType = i % 3,
+                                IsDelete = false,
+                            };
+                            shopRepository.Add(shop);
+                            tran.Complete();
+                        }
                     }
                     lstShop = shopRepository.GetList(QueryFactory.Create<ShopEntity>());
                     var importGroupId = Guid.NewGuid();
@@ -82,31 +85,35 @@ namespace Tests
 
                     repositoryNSFactory.Delete(QueryFactory.Create<ProductSaleByDayNSEntity>());
                     var tempDate = new DateTime(2018, 1, 1);
-                    while (tempDate <= DateTime.Now)
+                    using (var tran = DBTool.BeginTransaction())
                     {
-
-                        foreach (var p in dicProduct)
+                        while (tempDate <= DateTime.Now)
                         {
-                            var tempNS = new ProductSaleByDayNSEntity();
 
-                            tempNS.DataSource = lstDataSource[random.Next(lstDataSource.Count)];
-                            var shop = lstShop[random.Next(lstShop.Count)];
-                            tempNS.ShopID = shop.SysNo;
+                            foreach (var p in dicProduct)
+                            {
+                                var tempNS = new ProductSaleByDayNSEntity();
 
-                            tempNS.ProductID = p.Key.ToString();
-                            tempNS.OutProductID = p.Value;
-                            tempNS.ProductName = p.Value;
-                            tempNS.Sales = random.Next(100000);
-                            tempNS.StatisticalDate = tempDate;
-                            tempNS.CreateDate = DateTime.Now;
-                            tempNS.CreateUserID = Guid.NewGuid().ToString();
-                            tempNS.ImportGroupId = importGroupId.ToString();
+                                tempNS.DataSource = lstDataSource[random.Next(lstDataSource.Count)];
+                                var shop = lstShop[random.Next(lstShop.Count)];
+                                tempNS.ShopID = shop.SysNo;
 
-                            repositoryNSFactory.Add(tempNS);
+                                tempNS.ProductID = p.Key.ToString();
+                                tempNS.OutProductID = p.Value;
+                                tempNS.ProductName = p.Value;
+                                tempNS.Sales = random.Next(100000);
+                                tempNS.StatisticalDate = tempDate;
+                                tempNS.CreateDate = DateTime.Now;
+                                tempNS.CreateUserID = Guid.NewGuid().ToString();
+                                tempNS.ImportGroupId = importGroupId.ToString();
+
+                                repositoryNSFactory.Add(tempNS);
 
 
+                            }
+                            tempDate = tempDate.AddDays(1);
                         }
-                        tempDate = tempDate.AddDays(1);
+                        tran.Complete();
                     }
                 }
                 finally

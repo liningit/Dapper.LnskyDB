@@ -29,7 +29,7 @@ namespace LnskyDB.Internal
             var sql = $"SELECT * FROM {obj.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}{DBTool.GetTableName(obj)}{obj.GetDBModel_SqlProvider().GetProviderOption().CloseQuote} ";
             try
             {
-                var lst = conn.Query<T>(sql: sql, param: obj, commandTimeout: commandTimeout).AsList();
+                var lst = conn.Query<T>(sql: sql, param: obj, commandTimeout: commandTimeout, transaction: DBTool.GetTransaction(conn)).AsList();
                 lst.ForEach(m => { m.GetDBModel_ChangeList().Clear(); m.BeginChange(); });
                 return lst;
             }
@@ -65,7 +65,7 @@ namespace LnskyDB.Internal
             DynamicParameters dynamicParameters = SetWhereSql(query, sql, true);
             try
             {
-                return conn.QuerySingleOrDefault<long>(sql: sql.ToString(), param: dynamicParameters, commandTimeout: commandTimeout);
+                return conn.QuerySingleOrDefault<long>(sql: sql.ToString(), param: dynamicParameters, commandTimeout: commandTimeout, transaction: DBTool.GetTransaction(conn));
             }
             catch (Exception e)
             {
@@ -79,7 +79,7 @@ namespace LnskyDB.Internal
             DynamicParameters dynamicParameters = SetWhereSql(query, sql);
             try
             {
-                var lst = conn.Query<T>(sql: sql.ToString(), param: dynamicParameters, commandTimeout: commandTimeout).AsList();
+                var lst = conn.Query<T>(sql: sql.ToString(), param: dynamicParameters, commandTimeout: commandTimeout, transaction: DBTool.GetTransaction(conn)).AsList();
                 lst.ForEach(m => { m.GetDBModel_ChangeList().Clear(); m.BeginChange(); });
                 return lst;
             }
@@ -96,7 +96,7 @@ namespace LnskyDB.Internal
             DynamicParameters dynamicParameters = SetWhereSql(query, sql);
             try
             {
-                var lst = conn.Query<R>(sql: sql.ToString(), param: dynamicParameters, commandTimeout: commandTimeout);
+                var lst = conn.Query<R>(sql: sql.ToString(), param: dynamicParameters, commandTimeout: commandTimeout, transaction: DBTool.GetTransaction(conn));
                 return lst;
             }
             catch (Exception e)
@@ -109,12 +109,12 @@ namespace LnskyDB.Internal
         {
             if (obj.GetDBModel_ChangeList().Count == 0)
             {
-                throw new Exception("没有筛选条件");
+                throw new LnskyDBException("没有筛选条件");
             }
             var sql = $"SELECT * FROM {obj.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}{DBTool.GetTableName(obj)}{obj.GetDBModel_SqlProvider().GetProviderOption().CloseQuote} {DBTool.GetTableWith(obj)} WHERE " + GetSql(obj, obj.GetDBModel_ChangeList(), "AND");
             try
             {
-                var res = conn.QueryFirstOrDefault<T>(sql: sql, param: obj, commandTimeout: commandTimeout);
+                var res = conn.QueryFirstOrDefault<T>(sql: sql, param: obj, commandTimeout: commandTimeout, transaction: DBTool.GetTransaction(conn));
                 res?.GetDBModel_ChangeList().Clear();
                 return res;
             }
@@ -128,7 +128,7 @@ namespace LnskyDB.Internal
         {
             if (obj.GetDBModel_ChangeList().Count == 0)
             {
-                throw new Exception("没有修改列");
+                throw new LnskyDBException("没有修改列");
             }
 
             var elst = obj.GetDBModel_PKCols().AddRange(obj.GetDBModel_ExcludeColsForUpdate());
@@ -139,7 +139,7 @@ namespace LnskyDB.Internal
             dynamicParameters.AddDynamicParams(obj);
             try
             {
-                return conn.Execute(sql: sql.ToString(), param: dynamicParameters, commandTimeout: commandTimeout);
+                return conn.Execute(sql: sql.ToString(), param: dynamicParameters, commandTimeout: commandTimeout, transaction: DBTool.GetTransaction(conn));
             }
             catch (Exception e)
             {
@@ -152,18 +152,18 @@ namespace LnskyDB.Internal
         {
             if (obj.GetDBModel_ChangeList().Count == 0)
             {
-                throw new Exception("没有修改列");
+                throw new LnskyDBException("没有修改列");
             }
             if (obj.GetDBModel_PKCols().Count == 0)
             {
-                throw new Exception("没有主键");
+                throw new LnskyDBException("没有主键");
             }
             var elst = obj.GetDBModel_PKCols().AddRange(obj.GetDBModel_ExcludeColsForUpdate());
             var updateList = obj.GetDBModel_ChangeList().Where(m => m != obj.GetDBModel_IncrementCol() && !elst.Contains(m)).ToList();
             var sql = $"UPDATE {obj.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}{DBTool.GetTableName(obj)}{obj.GetDBModel_SqlProvider().GetProviderOption().CloseQuote} SET {GetSql(obj, updateList, ",")} WHERE {GetSql(obj, obj.GetDBModel_PKCols(), "AND")}";
             try
             {
-                return conn.Execute(sql: sql, param: obj, commandTimeout: commandTimeout) > 0;
+                return conn.Execute(sql: sql, param: obj, commandTimeout: commandTimeout, transaction: DBTool.GetTransaction(conn)) > 0;
             }
             catch (Exception e)
             {
@@ -176,12 +176,12 @@ namespace LnskyDB.Internal
         {
             if (obj.GetDBModel_PKCols().Count == 0)
             {
-                throw new Exception("没有主键");
+                throw new LnskyDBException("没有主键");
             }
             var sql = $"DELETE FROM {obj.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}{DBTool.GetTableName(obj)}{obj.GetDBModel_SqlProvider().GetProviderOption().CloseQuote} WHERE {GetSql(obj, obj.GetDBModel_PKCols(), "AND")}";
             try
             {
-                return conn.Execute(sql: sql, param: obj, commandTimeout: commandTimeout) == 1;
+                return conn.Execute(sql: sql, param: obj, commandTimeout: commandTimeout, transaction: DBTool.GetTransaction(conn)) == 1;
             }
             catch (Exception e)
             {
@@ -196,7 +196,7 @@ namespace LnskyDB.Internal
 
             try
             {
-                return conn.Execute(sql: sql.ToString(), param: dynamicParameters, commandTimeout: commandTimeout);
+                return conn.Execute(sql: sql.ToString(), param: dynamicParameters, commandTimeout: commandTimeout, transaction: DBTool.GetTransaction(conn));
             }
             catch (Exception e)
             {
@@ -208,7 +208,7 @@ namespace LnskyDB.Internal
         {
             if (obj.GetDBModel_ChangeList().Count == 0)
             {
-                throw new Exception("没有修改列");
+                throw new LnskyDBException("没有修改列");
             }
             var sql = $"INSERT INTO {obj.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}{DBTool.GetTableName(obj)}{obj.GetDBModel_SqlProvider().GetProviderOption().CloseQuote}({string.Join(',', obj.GetDBModel_ChangeList())}) VALUES(@{string.Join(",@", obj.GetDBModel_ChangeList())});";
             try
@@ -216,12 +216,12 @@ namespace LnskyDB.Internal
                 if (!string.IsNullOrEmpty(obj.GetDBModel_IncrementCol()))
                 {
                     sql += obj.GetDBModel_SqlProvider().GetSelectIncrement();
-                    var v = conn.ExecuteScalar<int>(sql: sql, param: obj, commandTimeout: commandTimeout);
+                    var v = conn.ExecuteScalar<int>(sql: sql, param: obj, commandTimeout: commandTimeout, transaction: DBTool.GetTransaction(conn));
                     obj.SetIncrementValue(v);
                 }
                 else
                 {
-                    conn.Execute(sql: sql, param: obj, commandTimeout: commandTimeout);
+                    conn.Execute(sql: sql, param: obj, commandTimeout: commandTimeout, transaction: DBTool.GetTransaction(conn));
                 }
                 obj.GetDBModel_ChangeList().Clear();
             }

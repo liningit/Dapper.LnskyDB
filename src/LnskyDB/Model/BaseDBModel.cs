@@ -49,7 +49,7 @@ namespace LnskyDB.Model
 
         public virtual void SetIncrementValue(int value)
         {
-            throw new Exception("该表没有自增列");
+            throw new LnskyDBException("该表没有自增列");
         }
         private string _tableWith = string.Empty;
         public string GetTableWith()

@@ -29,6 +29,7 @@ namespace LnskyDB
 
             });
             services.AddScoped<LnskyDBConnLst>();            
+            services.AddScoped<ILnskyDBTransactionMain>();
             services.AddHttpContextAccessor();
             services.AddHttpContextAccessor();
             return services;

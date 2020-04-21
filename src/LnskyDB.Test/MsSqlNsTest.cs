@@ -11,8 +11,10 @@ using System.Collections.Generic;
 using System.IO;
 using LnskyDB.Test.MsSql.Entity.LnskyNS;
 using LnskyDB.Test.MsSql.Repository.LnskyNS;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace Tests
+namespace LnskyDB.Test
 {
     public class MsSqlNsTest
     {
@@ -30,7 +32,9 @@ namespace Tests
             DBTool.Error += DBTool_Error;
             InitDic(dicProduct, "测试商品", 10);
             DBTool.BeginThread();
+
             Index();
+            Console.WriteLine("开始执行测试");
         }
 
         private void DBTool_Error(LnskyDB.Model.LnskyDBErrorArgs e)
@@ -58,27 +62,36 @@ namespace Tests
                 try
                 {
                     var repositoryNSFactory = RepositoryFactory.Create<ProductSaleByDayNSEntity>();
-                    if (repositoryNSFactory.GetList(m => m.CreateDate > DateTime.Now.Date).Count > 100)
+                    using (var tran = DBTool.BeginTransaction())
                     {
-                        return "";
+                        if (repositoryNSFactory.GetList(m => m.CreateDate > DateTime.Now.Date).Count > 100)
+                        {
+                            tran.Complete();
+                            return "";
+                        }
                     }
                     var shopRepository = RepositoryFactory.Create<ShopEntity>();
                     shopRepository.Delete(QueryFactory.Create<ShopEntity>());
-                    for (int i = 0; i < 10; i++)
+
+                    using (var tran = DBTool.BeginTransaction())
                     {
-
-
-                        var shop = new ShopEntity
+                        for (int i = 0; i < 10; i++)
                         {
-                            SysNo = Guid.NewGuid(),
-                            ShopCode = "00" + i,
-                            ShopName = "测试店铺" + i,
-                            ShopType = i % 3,
-                            IsDelete = false,
-                        };
-                        shopRepository.Add(shop);
+
+
+                            var shop = new ShopEntity
+                            {
+                                SysNo = Guid.NewGuid(),
+                                ShopCode = "00" + i,
+                                ShopName = "测试店铺" + i,
+                                ShopType = i % 3,
+                                IsDelete = false,
+                            };
+                            shopRepository.Add(shop);
+                        }
+                        lstShop = shopRepository.GetList(QueryFactory.Create<ShopEntity>());
+                        tran.Complete();
                     }
-                    lstShop = shopRepository.GetList(QueryFactory.Create<ShopEntity>());
                     var importGroupId = Guid.NewGuid();
                     var random = new Random();
 
@@ -86,28 +99,32 @@ namespace Tests
                     var tempDate = new DateTime(2018, 1, 1);
                     while (tempDate <= DateTime.Now)
                     {
-
-                        foreach (var p in dicProduct)
+                        using (var tran = DBTool.BeginTransaction())
                         {
-                            var tempNS = new ProductSaleByDayNSEntity();
-                            tempNS.SysNo = Guid.NewGuid();
-                            tempNS.DataSource = lstDataSource[random.Next(lstDataSource.Count)];
-                            var shop = lstShop[random.Next(lstShop.Count)];
-                            tempNS.ShopID = shop.SysNo;
 
-                            tempNS.ProductID = p.Key;
-                            tempNS.OutProductID = p.Value;
-                            tempNS.ProductName = p.Value;
-                            tempNS.Sales = random.Next(100000);
-                            tempNS.StatisticalDate = tempDate;
-                            tempNS.CreateDate = DateTime.Now;
-                            tempNS.CreateUserID = Guid.NewGuid();
-                            tempNS.ImportGroupId = importGroupId;
+                            foreach (var p in dicProduct)
+                            {
+                                var tempNS = new ProductSaleByDayNSEntity();
+                                tempNS.SysNo = Guid.NewGuid();
+                                tempNS.DataSource = lstDataSource[random.Next(lstDataSource.Count)];
+                                var shop = lstShop[random.Next(lstShop.Count)];
+                                tempNS.ShopID = shop.SysNo;
 
-                            repositoryNSFactory.Add(tempNS);
+                                tempNS.ProductID = p.Key;
+                                tempNS.OutProductID = p.Value;
+                                tempNS.ProductName = p.Value;
+                                tempNS.Sales = random.Next(100000);
+                                tempNS.StatisticalDate = tempDate;
+                                tempNS.CreateDate = DateTime.Now;
+                                tempNS.CreateUserID = Guid.NewGuid();
+                                tempNS.ImportGroupId = importGroupId;
 
+                                repositoryNSFactory.Add(tempNS);
+
+                            }
+                            tempDate = tempDate.AddDays(1);
+                            tran.Complete();
                         }
-                        tempDate = tempDate.AddDays(1);
                     }
                 }
                 finally
@@ -486,14 +503,225 @@ namespace Tests
         [Test]
         public void TestProductSaleByDayNSAddUpdateDelete()
         {
-            TestProductSaleByDayNSAdd();
-            TestProductSaleByDayNSUpdate();
-            TestProductSaleByDayNSUpdateWhere();
-            TestProductSaleByDayNSDelete();
+            using (var tran = DBTool.BeginTransaction())
+            {
+                TestProductSaleByDayNSAdd();
+                TestProductSaleByDayNSUpdate();
+                TestProductSaleByDayNSUpdateWhere();
+                TestProductSaleByDayNSDelete();
+                tran.Complete();
+            }
         }
+        #region TestProductSaleByDayNSTransaction
+
+        [Test]
+        public void TestProductSaleByDayNSTransaction()
+        {
+            TestTranAdd(true);
+            TestTranAdd(false);
+            TestTranUpdate(true);
+            TestTranUpdate(false);
+            TestTranUpdateWhere(false);
+            TestTranUpdateWhere(true);
+            TestTranDelete(false);
+            TestTranDelete(true);
+
+        }
+        private void TestTranDelete(bool isCommit)
+        {
+            using (var tran = DBTool.BeginTransaction())
+            {
+                var repository = GetRepository();
+                var query = QueryFactory.Create<ProductSaleByDayNSEntity>();
+                query.And(m => !m.DataSource.Contains("修改"));
+                query.OrderByDescing(m => m.StatisticalDate);
+                query.StarSize = new Random().Next(5);
+                query.Rows = 1;
+                var model = repository.GetPaging(query).ToList()[0];
+                repository.Delete(model);
+                var deleteCount = repository.Delete(m => m.DataSource == "测试来源批量修改");
+                Assert.True(deleteCount > 0);
+            }
+        }
+        private void TestTranUpdateWhere(bool isCommit)
+        {
+            var repository = GetRepository();
+            var where = QueryFactory.Create<ProductSaleByDayNSEntity>(m => !m.ProductName.Contains("批量修改Where") && m.ProductName.Contains("修改"));//where是更新条件
+
+            var count = repository.Count(where);
+            var updateEntity = new ProductSaleByDayNSEntity()
+            {
+                DataSource = "测试来源批量修改",
+                ProductName = "商品批量修改Where"
+            };
+            using (var tran = DBTool.BeginTransaction())
+            {
+                Assert.AreEqual(tran.TransactionIndex, 1);
+                using (var tran2 = DBTool.BeginTransaction())
+                {
+                    Assert.AreEqual(tran2.TransactionIndex, 2);
+                    //注意如果是更新用的是实体类的DBModel_ShuffledTempDate Query中的无效
+                    int updateCount = repository.Update(updateEntity, where);
+
+                    Assert.AreEqual(updateCount, count);
+                    Assert.AreNotEqual(updateCount, 0);
+                    if (isCommit)
+                    {
+                        tran.Complete();
+                    }
+                }
+            }
+            using (var tran = DBTool.BeginTransaction())
+            {
+                Assert.AreEqual(tran.TransactionIndex, 1);
+            }
+            if (isCommit)
+            {
+
+                var newcount = repository.Count(where);
+                Assert.AreNotEqual(count, newcount);
+            }
+            else
+            {
+                var newcount = repository.Count(where);
+                Assert.AreEqual(count, newcount);
+            }
+            using (var tran = DBTool.BeginTransaction())
+            {
+                Assert.AreEqual(tran.TransactionIndex, 1);
+            }
+
+        }
+        private void TestTranUpdate(bool isCommit)
+        {
+            var repository = GetRepository();
+            var queryCount = QueryFactory.Create<ProductSaleByDayNSEntity>();
+            queryCount.And(m => m.DataSource == "测试来源修改");
+            var preCount = repository.Count(queryCount);
+            ProductSaleByDayNSEntity model;
+            using (var tran = DBTool.BeginTransaction())
+            {
 
 
+                var query = QueryFactory.Create<ProductSaleByDayNSEntity>();
+                query.And(m => m.DataSource != "测试来源修改");
+                query.OrderByDescing(m => m.StatisticalDate);
+                query.StarSize = new Random().Next(5);
+                query.Rows = 1;
+                model = repository.GetPaging(query).ToList()[0];
 
+                model.DataSource = "测试来源修改";
+                model.ProductName = "测试商品修改";
+
+                //根据主键更新其他字段
+                var r = repository.Update(model);
+                Assert.True(r);
+                var nextCount = repository.Count(queryCount);
+                Assert.AreEqual(preCount + 1, nextCount);
+                var entity = repository.Get(new ProductSaleByDayNSEntity { SysNo = model.SysNo });
+                Assert.NotNull(entity);
+                Assert.AreEqual(model.SysNo, entity.SysNo);
+                Assert.AreEqual(model.DataSource, entity.DataSource);
+                Assert.AreEqual(model.ProductName, entity.ProductName);
+                if (isCommit)
+                {
+                    tran.Complete();
+
+                }
+            }
+            if (isCommit)
+            {
+                var nextCount = repository.Count(queryCount);
+                Assert.AreEqual(preCount + 1, nextCount);
+                var entity = repository.Get(new ProductSaleByDayNSEntity { SysNo = model.SysNo });
+                Assert.NotNull(entity);
+                Assert.AreEqual(model.SysNo, entity.SysNo);
+                Assert.AreEqual(model.DataSource, entity.DataSource);
+                Assert.AreEqual(model.ProductName, entity.ProductName);
+
+            }
+            else
+            {
+                var nextCount = repository.Count(queryCount);
+                Assert.AreEqual(preCount, nextCount);
+                var entity = repository.Get(new ProductSaleByDayNSEntity { SysNo = model.SysNo });
+                Assert.NotNull(entity);
+                Assert.AreEqual(model.SysNo, entity.SysNo);
+                Assert.AreNotEqual(model.DataSource, entity.DataSource);
+                Assert.AreNotEqual(model.ProductName, entity.ProductName);
+            }
+        }
+        private void TestTranAdd(bool isCommit)
+        {
+            var repository = GetRepository();
+            var lst = repository.GetList();
+            List<ProductSaleByDayNSEntity> newLst;
+            using (var tran = DBTool.BeginTransaction())
+            {
+                TestProductSaleByDayNSAdd();
+                newLst = repository.GetList();
+                Assert.True(lst.Count < newLst.Count);
+                if (isCommit)
+                {
+                    tran.Complete();
+                }
+            }
+            if (isCommit)
+            {
+
+                newLst = repository.GetList();
+                Assert.True(lst.Count + 1 == newLst.Count);
+            }
+            else
+            {
+
+                newLst = repository.GetList();
+                Assert.True(lst.Count == newLst.Count);
+            }
+        }
+        #endregion
+        [Test]
+        public void TestThread()
+        {
+            List<Task> lst = new List<Task>();
+            for (var i = 0; i < 100; i++)
+            {
+                var task = Task.Run(() => TestQueueUserWorkItem());
+                lst.Add(task);
+            }
+            Task.WaitAll(lst.ToArray());
+        }
+        static ILnskyDBTransactionMain LnskyDBTransactionMain = null;
+        static Random random = new Random();
+        public void TestQueueUserWorkItem()
+        {
+            DBTool.BeginThread();
+            try
+            {
+
+                Thread.Sleep(random.Next(5000));
+                ILnskyDBTransactionMain temp;
+                using (var tran = DBTool.BeginTransaction())
+                {
+                    temp = DBTool.GetLnskyDBTransactionMain();
+                    if (LnskyDBTransactionMain != null)
+                    {
+                        Assert.AreNotEqual(temp, LnskyDBTransactionMain);
+                    }
+                    LnskyDBTransactionMain = temp;
+                    TestProductSaleByDayNSGet();
+                }
+                using (var tran = DBTool.BeginTransaction())
+                {
+                    var temp2 = DBTool.GetLnskyDBTransactionMain();
+                    Assert.AreEqual(temp, temp2);
+                }
+            }
+            finally
+            {
+                DBTool.CloseConnections();
+            }
+        }
         [TearDown]
         public void TestTearDown()
         {
