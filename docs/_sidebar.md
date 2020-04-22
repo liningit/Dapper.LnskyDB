@@ -6,4 +6,5 @@
   * [不分库分表](/noshuffled)
   * [分库分表](/shuffled)
   * [连表查询](/join)
+  * [数据库事务](/transaction)
   * [高级操作](/advanced)

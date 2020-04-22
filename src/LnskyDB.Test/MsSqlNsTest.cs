@@ -530,18 +530,33 @@ namespace LnskyDB.Test
         }
         private void TestTranDelete(bool isCommit)
         {
+            var repository = GetRepository();
+            var query = QueryFactory.Create<ProductSaleByDayNSEntity>();
+            query.And(m => !m.DataSource.Contains("修改"));
+            query.OrderByDescing(m => m.StatisticalDate);
+            query.StarSize = new Random().Next(5);
+            query.Rows = 1;
+            var model = repository.GetPaging(query).ToList()[0];
             using (var tran = DBTool.BeginTransaction())
             {
-                var repository = GetRepository();
-                var query = QueryFactory.Create<ProductSaleByDayNSEntity>();
-                query.And(m => !m.DataSource.Contains("修改"));
-                query.OrderByDescing(m => m.StatisticalDate);
-                query.StarSize = new Random().Next(5);
-                query.Rows = 1;
-                var model = repository.GetPaging(query).ToList()[0];
+
                 repository.Delete(model);
                 var deleteCount = repository.Delete(m => m.DataSource == "测试来源批量修改");
                 Assert.True(deleteCount > 0);
+                if (isCommit)
+                {
+                    tran.Complete();
+                }
+            }
+            if (isCommit)
+            {
+                var delModel = repository.Get(new ProductSaleByDayNSEntity { SysNo = model.SysNo });
+                Assert.IsNull(delModel);
+            }
+            else
+            {
+                var delModel = repository.Get(new ProductSaleByDayNSEntity { SysNo = model.SysNo });
+                Assert.IsNotNull(delModel);
             }
         }
         private void TestTranUpdateWhere(bool isCommit)
