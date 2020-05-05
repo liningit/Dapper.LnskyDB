@@ -6,7 +6,14 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Authors>liningit</Authors>
     <Company />
-    <Description>基于Dapper的Lambda扩展支持按时间分库分表,也可以自定义分库分表方法,且实体类有T4模版自动生成.省去手写实体类的麻烦
+    <Description>Based on the LINQ extension of dapper, it supports lambda expression, supports time based table splitting, and can also customize the table splitting method.</Description>
+    <PackageProjectUrl>https://github.com/liningit/LnskyDB/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/liningit/LnskyDB/</RepositoryUrl>
+    <RepositoryType>github</RepositoryType>
+    <PackageTags>Dapper,Lambda,LINQ</PackageTags>
+    <PackageReleaseNotes>基于Dapper的Lambda扩展支持按时间分库分表,也可以自定义分库分表方法,且实体类有T4模版自动生成.省去手写实体类的麻烦
+v3.1.1
+修改描述为英文
 v3.1.0
 支持事务了
 v3.0.2
@@ -38,17 +45,12 @@ v2.0.0
 2.OrderBy支持表达式及数据库函数
 v1.0.1
 1.Where条件支持两个字段进行加减乘除操作
-2.Where条件支持Sql函数</Description>
-    <PackageProjectUrl>https://github.com/liningit/LnskyDB/</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/liningit/LnskyDB/</RepositoryUrl>
-    <RepositoryType>github</RepositoryType>
-    <PackageTags>Dapper,Lambda,LINQ</PackageTags>
-    <PackageReleaseNotes>基于Dapper的Lambda扩展支持按时间分库分表,也可以自定义分库分表方法,且实体类有T4模版自动生成.省去手写实体类的麻烦</PackageReleaseNotes>
+2.Where条件支持Sql函数</PackageReleaseNotes>
     <PackageLicenseUrl>https://licenses.nuget.org/MIT</PackageLicenseUrl>
     <Copyright></Copyright>
-    <Version>3.1.0</Version>
-    <AssemblyVersion>3.1.0.0</AssemblyVersion>
-    <FileVersion>3.1.0.0</FileVersion>
+    <Version>3.1.1</Version>
+    <AssemblyVersion>3.1.1.0</AssemblyVersion>
+    <FileVersion>3.1.1.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
