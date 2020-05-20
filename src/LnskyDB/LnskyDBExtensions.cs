@@ -1,4 +1,5 @@
 ﻿using LnskyDB.Filter;
+using LnskyDB.Internal;
 using LnskyDB.Model;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -28,8 +29,8 @@ namespace LnskyDB
                 options.Filters.Add(typeof(ApiExceptionFilterAttribute));
 
             });
-            services.AddScoped<LnskyDBConnLst>();            
-            services.AddScoped<ILnskyDBTransactionMain>();
+            services.AddScoped<LnskyDBConnLst>();
+            services.AddScoped<ILnskyDBTransactionMain, LnskyDBTransactionMain>();
             services.AddHttpContextAccessor();
             services.AddHttpContextAccessor();
             return services;
@@ -37,7 +38,7 @@ namespace LnskyDB
 
         public static IApplicationBuilder UseLnskyDB(this IApplicationBuilder app)
         {
-            var httpContextAccessor = app.ApplicationServices.GetRequiredService<IHttpContextAccessor>();          
+            var httpContextAccessor = app.ApplicationServices.GetRequiredService<IHttpContextAccessor>();
             DBTool.HttpContext = httpContextAccessor;
             DBTool.Configuration = app.ApplicationServices.GetRequiredService<IConfiguration>();
             return app;
