@@ -95,10 +95,20 @@ namespace LnskyDB.Expressions
                     Visit(exp);
                     return;
             }
+
             if (TypeHelper.IsNameExpression(exp))
             {
-                Visit(exp);
-                return;
+                try
+                {
+
+                    GetExpressionValue(exp);
+                }
+                catch
+                {
+                    Visit(exp);
+                    return;
+                }
+
             }
             switch (exp.NodeType)
             {
@@ -124,7 +134,7 @@ namespace LnskyDB.Expressions
 
             try
             {
-                SetParam(GetExpressionValue(exp));                
+                SetParam(GetExpressionValue(exp));
             }
             catch (InvalidOperationException)
             {

@@ -11,10 +11,13 @@ namespace LnskyDB
         int? CommandTimeout { get; set; }
         void Add(T obj);
         long Count(IQuery<T> query);
+        long Count(Expression<Func<T, bool>> query);
         bool Delete(T obj);
         int Delete(IQuery<T> where);
         int Delete(Expression<Func<T, bool>> predicate);
         T Get(T obj);
+        T Get(IQuery<T> query);
+        T Get(Expression<Func<T, bool>> query);
         List<T> GetList();
         List<T> GetList(Expression<Func<T, bool>> predicate);
         List<T> GetList(IQuery<T> query);

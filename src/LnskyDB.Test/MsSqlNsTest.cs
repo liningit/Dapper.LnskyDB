@@ -30,7 +30,7 @@ namespace LnskyDB.Test
             var configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
             DBTool.Configuration = configuration;
             DBTool.Error += DBTool_Error;
-            InitDic(dicProduct, "≤‚ ‘…Ã∆∑", 10);
+            InitDic(dicProduct, "≤‚ ‘…Ã∆∑", 20);
             DBTool.BeginThread();
 
             Index();
@@ -51,6 +51,7 @@ namespace LnskyDB.Test
         }
         public string Index()
         {
+
             if (isRuning == true)
             {
                 return "’˝‘⁄‘À––÷–";
@@ -97,10 +98,13 @@ namespace LnskyDB.Test
 
                     repositoryNSFactory.Delete(QueryFactory.Create<ProductSaleByDayNSEntity>());
                     var tempDate = new DateTime(2018, 1, 1);
-                    while (tempDate <= DateTime.Now)
+                    int index = 0;
+                    var tandom = new Random();
+                    while (tempDate <= new DateTime(2019, 12, 31))
                     {
                         using (var tran = DBTool.BeginTransaction())
                         {
+
 
                             foreach (var p in dicProduct)
                             {
@@ -118,10 +122,14 @@ namespace LnskyDB.Test
                                 tempNS.CreateDate = DateTime.Now;
                                 tempNS.CreateUserID = Guid.NewGuid();
                                 tempNS.ImportGroupId = importGroupId;
-
+                                tempNS.IsExclude = tandom.Next(0, 2) == 1;
+                                tempNS.IsExclude2 = tandom.Next(0, 2) == 1;
+                                tempNS.IsExclude3 = tandom.Next(0, 2) == 1;
                                 repositoryNSFactory.Add(tempNS);
+                                index++;
 
                             }
+
                             tempDate = tempDate.AddDays(1);
                             tran.Complete();
                         }
@@ -187,6 +195,41 @@ namespace LnskyDB.Test
             Assert.AreEqual(model.ShopID, entity.ShopID);
             Assert.AreEqual(model.ProductName, entity.ProductName);
 
+            entity = repository.Get(m => m.SysNo == model.SysNo);
+
+            Assert.NotNull(entity);
+            Assert.AreEqual(model.SysNo, entity.SysNo);
+            Assert.AreEqual(model.ShopID, entity.ShopID);
+            Assert.AreEqual(model.ProductName, entity.ProductName);
+
+            entity = repository.Get(m => m.SysNo == model.SysNo && m.ShopID == model.ShopID);
+
+            Assert.NotNull(entity);
+            Assert.AreEqual(model.SysNo, entity.SysNo);
+            Assert.AreEqual(model.ShopID, entity.ShopID);
+            Assert.AreEqual(model.ProductName, entity.ProductName);
+        }
+
+
+        [Test]
+        public void TestError()
+        {
+            var repository = GetRepository();
+            var lst = repository.GetList();
+
+            var all = lst.AsQueryable();
+            IQuery<ProductSaleByDayNSEntity> query;
+            var t = lst[2];
+            Expression<Func<ProductSaleByDayNSEntity, bool>> where;
+            long allCount, c;
+
+            where =
+                m => m.SysNo == t.SysNo;
+            query = QueryFactory.Create(where);
+            c = repository.Count(query);
+            allCount = all.Count(where);
+            Assert.AreEqual(allCount, c);
+            Assert.AreNotEqual(allCount, 0);
         }
         [Test]
         public void TestProductSaleByDayNSGetList()
@@ -199,15 +242,18 @@ namespace LnskyDB.Test
             long c;
             query = QueryFactory.Create<ProductSaleByDayNSEntity>(m =>
            m.ProductName.Contains("≤‚ ‘") && !m.ProductName.Contains("≤ª¥Ê‘⁄")
-           && m.StatisticalDate >= new DateTime(2019, 2, 10) && m.StatisticalDate < new DateTime(2019, 2, 27)
+
            );
 
+            var lst = repository.GetList(query);
             var q2 = query.Select(m => new ProductSaleByDayNSEntity { SysNo = m.SysNo, BrandID = m.BrandID, ProductName = m.ProductName, StatisticalDate = m.StatisticalDate });
 
-            var lst = repository.GetList(q2);
+            lst = repository.GetList(q2);
 
             Assert.True(lst.Count > 30);
-            Assert.False(lst.Any(m => !(m.ProductName?.Contains("≤‚ ‘")).GetValueOrDefault() || m.StatisticalDate.Year != 2019 || m.StatisticalDate.Month != 2));
+            Assert.False(lst.Any(m => !(m.ProductName?.Contains("≤‚ ‘")).GetValueOrDefault()));
+
+
 
             lst = repository.GetList();
             lst[0].ProductName = "";
@@ -223,6 +269,28 @@ namespace LnskyDB.Test
             c = repository.Count(query);
             Assert.AreEqual(allCount, c);
             Assert.AreNotEqual(allCount, 0);
+            //--------------------------≤‚ ‘---------------------------
+
+            where =
+                   m => m.SysNo == lst[2].SysNo;
+            query = QueryFactory.Create(where);
+            c = repository.Count(query);
+            allCount = all.Count(where);
+            Assert.AreEqual(allCount, c);
+            Assert.AreNotEqual(allCount, 0);
+            //--------------------------≤‚ ‘---------------------------
+
+            where =
+                      m => m.IsExclude && m.IsExclude2 && m.IsExclude2 && m.IsExclude && m.IsExclude2 && m.Sales > 0 && m.IsExclude2 && m.IsExclude3 == false;
+            allCount = all.Count(where);
+
+            c = repository.Count(where);
+            Assert.AreEqual(allCount, c);
+            Assert.AreNotEqual(allCount, 0);
+            //--------------------------≤‚ ‘---------------------------
+
+
+
 
             where =
              m => m.ProductName.Contains("≤ª¥Ê‘⁄") || m.ProductName.Contains("≤‚ ‘…Ã∆∑1");
@@ -238,6 +306,7 @@ namespace LnskyDB.Test
 
             c = repository.Count(query);
             Assert.True(c == 0);
+            //--------------------------≤‚ ‘---------------------------
 
 
 
@@ -251,6 +320,7 @@ namespace LnskyDB.Test
             c = repository.Count(query);
             Assert.AreEqual(allCount, c);
             Assert.AreNotEqual(allCount, 0);
+            //--------------------------≤‚ ‘---------------------------
 
             where = m => m.IsExclude == false && m.ProductName.Contains("≤‚ ‘…Ã∆∑1");
             allCount = all.Count(where);
@@ -258,6 +328,7 @@ namespace LnskyDB.Test
             c = repository.Count(query);
             Assert.AreEqual(allCount, c);
             Assert.AreNotEqual(allCount, 0);
+            //--------------------------≤‚ ‘---------------------------
 
             where =
              m => m.Sales + m.NumberOfSales > m.OrderQuantity + m.NumberOfSales && m.Sales > 0;
@@ -267,6 +338,7 @@ namespace LnskyDB.Test
             c = repository.Count(query);
             Assert.AreEqual(allCount, c);
             Assert.AreNotEqual(allCount, 0);
+            //--------------------------≤‚ ‘---------------------------
 
 
             where =
@@ -277,6 +349,7 @@ namespace LnskyDB.Test
             c = repository.Count(query);
             Assert.AreEqual(allCount, c);
             Assert.AreNotEqual(allCount, 0);
+            //--------------------------≤‚ ‘---------------------------
 
 
             where =
@@ -286,6 +359,7 @@ namespace LnskyDB.Test
             c = repository.Count(query);
             Assert.AreEqual(allCount, c);
             Assert.AreNotEqual(allCount, 0);
+            //--------------------------≤‚ ‘---------------------------
 
             where =
          m => string.IsNullOrEmpty(m.ProductName) && !string.IsNullOrEmpty(m.DataSource);
@@ -294,6 +368,7 @@ namespace LnskyDB.Test
             c = repository.Count(query);
             Assert.AreEqual(allCount, c);
             Assert.AreNotEqual(allCount, 0);
+            //--------------------------≤‚ ‘---------------------------
 
 
             where =
@@ -303,14 +378,17 @@ namespace LnskyDB.Test
             c = repository.Count(query);
             Assert.AreEqual(allCount, c);
             Assert.AreNotEqual(allCount, 0);
-            var sysNos = new List<Guid>();
+            //--------------------------≤‚ ‘---------------------------
 
+
+            var sysNos = new List<Guid>();
             where = m => sysNos.Contains(m.SysNo);
             allCount = all.Count(where);
             query = QueryFactory.Create(where);
             c = repository.Count(query);
             Assert.AreEqual(allCount, c);
             Assert.AreEqual(allCount, 0);
+            //--------------------------≤‚ ‘---------------------------
 
             sysNos = all.OrderBy(m => Guid.NewGuid()).Take(10).Select(m => m.SysNo).ToList();
 
@@ -320,6 +398,7 @@ namespace LnskyDB.Test
             c = repository.Count(query);
             Assert.AreEqual(allCount, c);
             Assert.AreEqual(allCount, 10);
+            //--------------------------≤‚ ‘---------------------------
 
             where = m => m.ShopID != Guid.Empty && sysNos.Contains(m.SysNo) && m.SysNo != Guid.NewGuid();
             allCount = all.Count(where);
@@ -327,6 +406,7 @@ namespace LnskyDB.Test
             c = repository.Count(query);
             Assert.AreEqual(allCount, c);
             Assert.AreEqual(allCount, 10);
+            //--------------------------≤‚ ‘---------------------------
 
             var tempRes = query.Select(m => m.SysNo);
             where = m => tempRes.Contains(m.SysNo);
@@ -336,6 +416,8 @@ namespace LnskyDB.Test
             var l2 = repository.GetList(where);
             Assert.AreEqual(l.Count, 10);
             Assert.AreEqual(l2.Count, 10);
+            //--------------------------≤‚ ‘---------------------------
+
             TestJq1();
             TestJq2();
 

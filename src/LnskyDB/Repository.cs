@@ -268,8 +268,21 @@ namespace LnskyDB
             return GetList(query);
         }
 
+        public long Count(Expression<Func<T, bool>> predicate)
+        {
+            var query = QueryFactory.Create(predicate);
+            return Count(query);
+        }
 
+        public T Get(Expression<Func<T, bool>> predicate)
+        {
+            var query = QueryFactory.Create(predicate);
+            return Get(query);
+        }
 
-
+        public T Get(IQuery<T> query)
+        {
+            return GetConn(query.DBModel).Get(query: query, commandTimeout: CommandTimeout);
+        }
     }
 }

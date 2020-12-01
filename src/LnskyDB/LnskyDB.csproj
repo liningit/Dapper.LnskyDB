@@ -12,6 +12,9 @@
     <RepositoryType>github</RepositoryType>
     <PackageTags>Dapper,Lambda,LINQ</PackageTags>
     <PackageReleaseNotes>基于Dapper的Lambda扩展支持按时间分库分表,也可以自定义分库分表方法,且实体类有T4模版自动生成.省去手写实体类的麻烦
+v3.1.5
+1.多个bool类型组合在一起的时候查询报错的bug,如:m.IsExclude &amp;&amp; m.IsExclude2 &amp;&amp; m.IsExclude2 
+2.当筛选条件里面有list类型时候筛选条件无效的bug,如: m =&gt; m.SysNo == lst[2].SysNo
 v3.1.3
 LnskyDBTransactionMain注册失败bug修改
 v3.1.2
@@ -52,9 +55,9 @@ v1.0.1
 2.Where条件支持Sql函数</PackageReleaseNotes>
     <PackageLicenseUrl>https://licenses.nuget.org/MIT</PackageLicenseUrl>
     <Copyright></Copyright>
-    <Version>3.1.3</Version>
-    <AssemblyVersion>3.1.3.0</AssemblyVersion>
-    <FileVersion>3.1.3.0</FileVersion>
+    <Version>3.1.4</Version>
+    <AssemblyVersion>3.1.4.0</AssemblyVersion>
+    <FileVersion>3.1.4.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

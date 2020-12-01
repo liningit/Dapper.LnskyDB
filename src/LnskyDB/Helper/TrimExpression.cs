@@ -103,6 +103,16 @@ namespace LnskyDB.Helper
                         }
                         return b;
                     }
+                    else
+                    {
+                        if (b.Left.Type.Name == "Boolean" && b.Right.Type.Name == "Boolean")
+                        {
+                            if (expression.NodeType == ExpressionType.AndAlso)
+                                return Expression.AndAlso(Expression.Equal(b.Left, Expression.Constant(true)), Expression.Equal(b.Right, Expression.Constant(true)));
+                            if (expression.NodeType == ExpressionType.OrElse)
+                                return Expression.OrElse(Expression.Equal(b.Left, Expression.Constant(true)), Expression.Equal(b.Right, Expression.Constant(true)));
+                        }
+                    }
                     break;
                 case ExpressionType.Lambda:
                     _isDeep = true;

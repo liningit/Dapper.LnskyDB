@@ -132,6 +132,18 @@ namespace LnskyDB.Test.MsSql.Entity.Purify
 		/// </summary>		
 		public bool IsExclude { get { return _IsExclude; } set { Change("IsExclude"); _IsExclude = value; } }
 		
+		bool _IsExclude2;
+		/// <summary>
+		/// 黑名单
+		/// </summary>		
+		public bool IsExclude2 { get { return _IsExclude2; } set { Change("IsExclude2"); _IsExclude2 = value; } }
+		
+		bool? _IsExclude3;
+		/// <summary>
+		/// 黑名单
+		/// </summary>		
+		public bool? IsExclude3 { get { return _IsExclude3; } set { Change("IsExclude3"); _IsExclude3 = value; } }
+		
 		#endregion Model
 	}
 }
