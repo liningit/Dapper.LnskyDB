@@ -793,32 +793,42 @@ namespace LnskyDB.Test
         static Random random = new Random();
         public void TestQueueUserWorkItem()
         {
-            DBTool.BeginThread();
-            try
+            using (DBTool.BeginThread())
             {
 
                 Thread.Sleep(random.Next(5000));
                 ILnskyDBTransactionMain temp;
-                using (var tran = DBTool.BeginTransaction())
+                using (DBTool.BeginThread())
                 {
-                    temp = DBTool.GetLnskyDBTransactionMain();
-                    if (LnskyDBTransactionMain != null)
+
+                    using (var tran = DBTool.BeginTransaction())
                     {
-                        Assert.AreNotEqual(temp, LnskyDBTransactionMain);
+                        temp = DBTool.GetLnskyDBTransactionMain();
+                        if (LnskyDBTransactionMain != null)
+                        {
+                            Assert.AreNotEqual(temp, LnskyDBTransactionMain);
+                        }
+                        LnskyDBTransactionMain = temp;
+                        TestProductSaleByDayNSGet();
                     }
-                    LnskyDBTransactionMain = temp;
-                    TestProductSaleByDayNSGet();
                 }
                 using (var tran = DBTool.BeginTransaction())
                 {
                     var temp2 = DBTool.GetLnskyDBTransactionMain();
                     Assert.AreEqual(temp, temp2);
                 }
+
             }
-            finally
+            bool isOk = false;
+            try
             {
-                DBTool.CloseConnections();
+                TestProductSaleByDayNSGet();
             }
+            catch (Exception e)
+            {
+                isOk = true;
+            }
+            Assert.True(isOk);
         }
         [TearDown]
         public void TestTearDown()

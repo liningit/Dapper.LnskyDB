@@ -22,6 +22,24 @@ using LnskyDB.Internal;
 
 namespace LnskyDB
 {
+    public class DBConn : IDisposable
+    {
+        public int Index = 0;
+
+
+        public void Dispose()
+        {
+            if (Index <= 1)
+            {
+                DBTool.CloseConnections();
+                Index--;
+            }
+            else
+            {
+                Index--;
+            }
+        }
+    }
     public class DBTool
     {
         public static event LnskyDBEventHandler<LnskyDBErrorArgs> Error;
@@ -30,6 +48,7 @@ namespace LnskyDB
         /// </summary>
         [ThreadStatic] private static LnskyDBConnLst ThreadLnskyDBConnLst;
         [ThreadStatic] private static ILnskyDBTransactionMain ThreadLnskyDBTransaction;
+        [ThreadStatic] private static DBConn DBConnObj;
 
         /// <summary>
         /// 获取当前请求的数据库连接列表
@@ -67,10 +86,19 @@ namespace LnskyDB
         /// <summary>
         /// 当在线程中使用时要在开始调用
         /// </summary>
-        public static void BeginThread()
+        public static DBConn BeginThread()
         {
-            ThreadLnskyDBConnLst = new LnskyDBConnLst();
-            ThreadLnskyDBTransaction = new LnskyDBTransactionMain();
+            if (DBConnObj == null)
+            {
+                DBConnObj = new DBConn();
+            }
+            DBConnObj.Index++;
+            if (DBConnObj.Index <= 1)
+            {
+                ThreadLnskyDBConnLst = new LnskyDBConnLst();
+                ThreadLnskyDBTransaction = new LnskyDBTransactionMain();
+            }
+            return DBConnObj;
         }
         /// <summary>
         /// 开启事务
