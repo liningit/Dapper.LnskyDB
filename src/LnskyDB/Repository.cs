@@ -19,10 +19,10 @@ namespace LnskyDB
     }
     public abstract class AbstractRepository<T> : IRepository<T> where T : BaseDBModel, new()
     {
-        private T dbModel = null;
+        protected T DBModel = null;
         internal AbstractRepository(T obj)
         {
-            dbModel = obj ?? throw new LnskyDBException("对象不可为空");
+            DBModel = obj ?? throw new LnskyDBException("对象不可为空");
 
         }
         public int? CommandTimeout { get; set; }
@@ -31,7 +31,7 @@ namespace LnskyDB
         {
             if (obj == null)
             {
-                obj = dbModel;
+                obj = DBModel;
             }
             return DBTool.GetConnection(obj);
 
