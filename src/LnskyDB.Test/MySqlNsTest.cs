@@ -176,6 +176,21 @@ namespace LnskyDB.Test
             Assert.AreEqual(model.ShopID, entity.ShopID);
             Assert.AreEqual(model.ProductName, entity.ProductName);
 
+
+            entity = repository.Get(m => m.SysNo == model.SysNo);
+
+            Assert.NotNull(entity);
+            Assert.AreEqual(model.SysNo, entity.SysNo);
+            Assert.AreEqual(model.ShopID, entity.ShopID);
+            Assert.AreEqual(model.ProductName, entity.ProductName);
+
+            entity = repository.Get(m => m.SysNo == model.SysNo && m.ShopID == model.ShopID);
+
+            Assert.NotNull(entity);
+            Assert.AreEqual(model.SysNo, entity.SysNo);
+            Assert.AreEqual(model.ShopID, entity.ShopID);
+            Assert.AreEqual(model.ProductName, entity.ProductName);
+
         }
         [Test]
         public void TestProductSaleByDayNSGetList()

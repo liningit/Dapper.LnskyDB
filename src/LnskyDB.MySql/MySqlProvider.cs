@@ -40,5 +40,10 @@ namespace LnskyDB.MySql
         {
             return "select LAST_INSERT_ID() as Id";
         }
+
+        public string GetTopOneSql(string sqlStr)
+        {
+            return string.Format(sqlStr, "", "LIMIT 0,1");
+        }
     }
 }

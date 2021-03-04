@@ -107,11 +107,14 @@ namespace LnskyDB.Internal
         }
         internal static T Get<T>(this DbConnection conn, IQuery<T> query, int? commandTimeout = null) where T : BaseDBModel
         {
-            var sql = new StringBuilder($"SELECT Top 1 * FROM {query.DBModel.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}{DBTool.GetTableName(query.DBModel)}{query.DBModel.GetDBModel_SqlProvider().GetProviderOption().CloseQuote} {DBTool.GetTableWith(query)} WHERE 1=1 ");
+            var sql = new StringBuilder($"SELECT {{0}} * FROM {query.DBModel.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}{DBTool.GetTableName(query.DBModel)}{query.DBModel.GetDBModel_SqlProvider().GetProviderOption().CloseQuote} {DBTool.GetTableWith(query)} WHERE 1=1 ");
             DynamicParameters dynamicParameters = SetWhereSql(query, sql);
+            sql.Append(" {1} ");
             try
             {
-                var lst = conn.Query<T>(sql: sql.ToString(), param: dynamicParameters, commandTimeout: commandTimeout, transaction: DBTool.GetTransaction(conn)).AsList();
+                var sqlStr = sql.ToString();
+                sqlStr= query.DBModel.GetDBModel_SqlProvider().GetTopOneSql(sqlStr);
+                var lst = conn.Query<T>(sql: sqlStr, param: dynamicParameters, commandTimeout: commandTimeout, transaction: DBTool.GetTransaction(conn)).AsList();
                 lst.ForEach(m => { m.GetDBModel_ChangeList().Clear(); m.BeginChange(); });
                 return lst.FirstOrDefault();
             }
@@ -127,7 +130,7 @@ namespace LnskyDB.Internal
             {
                 throw new LnskyDBException("没有筛选条件");
             }
-            var sql = $"SELECT  Top 1 * FROM {obj.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}{DBTool.GetTableName(obj)}{obj.GetDBModel_SqlProvider().GetProviderOption().CloseQuote} {DBTool.GetTableWith(obj)} WHERE " + GetSql(obj, obj.GetDBModel_ChangeList(), "AND");
+            var sql = $"SELECT   * FROM {obj.GetDBModel_SqlProvider().GetProviderOption().OpenQuote}{DBTool.GetTableName(obj)}{obj.GetDBModel_SqlProvider().GetProviderOption().CloseQuote} {DBTool.GetTableWith(obj)} WHERE " + GetSql(obj, obj.GetDBModel_ChangeList(), "AND");
             try
             {
                 var res = conn.QueryFirstOrDefault<T>(sql: sql, param: obj, commandTimeout: commandTimeout, transaction: DBTool.GetTransaction(conn));

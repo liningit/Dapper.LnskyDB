@@ -38,5 +38,10 @@ namespace LnskyDB.MsSql
         {
             return "select SCOPE_IDENTITY() as Id";
         }
+
+        public string GetTopOneSql(string sqlStr)
+        {
+            return string.Format(sqlStr, " Top 1 ", "");
+        }
     }
 }

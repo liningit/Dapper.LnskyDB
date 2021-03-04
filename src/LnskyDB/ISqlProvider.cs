@@ -15,5 +15,6 @@ namespace LnskyDB
         string GetLimit(long starSize, long row);
         ProviderOption GetProviderOption();
         string GetSelectIncrement();
+        string GetTopOneSql(string sqlStr);
     }
 }

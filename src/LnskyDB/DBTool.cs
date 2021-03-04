@@ -162,6 +162,9 @@ namespace LnskyDB
                 reqModel.ConnLst.Clear();
             }
             ThreadLnskyDBConnLst = null;
+            DBConnObj = null;
+            ThreadLnskyDBTransaction = null;
+
         }
         public static IConfiguration Configuration { get; set; }
         internal static IHttpContextAccessor HttpContext { get; set; }
