@@ -1,6 +1,5 @@
 ﻿using LnskyDB.Model;
-using LnskyDB.MsSql;
-using Newtonsoft.Json;
+using LnskyDB.MsSql; 
 using System;
 using System.Collections.Immutable;
 namespace LnskyDB.Demo.Entity.Purify
@@ -39,7 +38,7 @@ namespace LnskyDB.Demo.Entity.Purify
 
         DateTime _DBModel_ShuffledTempDate;
 
-        [JsonIgnore]
+   
         public DateTime DBModel_ShuffledTempDate { get { return StatisticalDate != DateTime.MinValue ? StatisticalDate : _DBModel_ShuffledTempDate; } set { _DBModel_ShuffledTempDate = value; } }
 
         public override void SetShuffledData(object obj) { DBModel_ShuffledTempDate = (DateTime)obj; }

@@ -4,8 +4,7 @@ using System.Linq;
 using LnskyDB;
 using LnskyDB.Demo.Entity.Data;
 using LnskyDB.Demo.Entity.Purify;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.AspNetCore.Mvc; 
 
 namespace Lnsky.Test.Controllers
 {

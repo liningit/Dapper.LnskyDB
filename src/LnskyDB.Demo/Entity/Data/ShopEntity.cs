@@ -1,6 +1,5 @@
 ﻿using LnskyDB.Model;
-using LnskyDB.MsSql;
-using Newtonsoft.Json;
+using LnskyDB.MsSql; 
 using System;
 using System.Collections.Immutable;
 namespace LnskyDB.Demo.Entity.Data

@@ -1,14 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
-    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <TargetFramework>net6.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
-  </ItemGroup>
+
 
   <ItemGroup>
     <ProjectReference Include="..\LnskyDB.MsSql\LnskyDB.MsSql.csproj" />
@@ -21,10 +18,7 @@
       <LastGenOutput>Entity.cs</LastGenOutput>
     </None>
   </ItemGroup>
-
-  <ItemGroup>
-    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
-  </ItemGroup>
+ 
 
   <ItemGroup>
     <Compile Update="T4\Entity.cs">
@@ -38,6 +32,10 @@
     <Folder Include="Entity\LnskyNS\" />
     <Folder Include="RepositoryInterface\LnskyNS\" />
     <Folder Include="Repository\LnskyNS\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 
 </Project>

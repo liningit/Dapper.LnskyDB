@@ -26,8 +26,7 @@
 		manager.StartBlock("LnskyDB.Demo\\Entity\\"+tableInfo.TablePre+"\\"+tableInfo.TableName+"Entity.cs");
 #>
 using LnskyDB.Model;
-using LnskyDB.MsSql;
-using Newtonsoft.Json;
+using LnskyDB.MsSql; 
 using System;
 using System.Collections.Immutable;
 namespace LnskyDB.Demo.Entity.<#=tableInfo.TablePre #>
@@ -77,7 +76,7 @@ namespace LnskyDB.Demo.Entity.<#=tableInfo.TablePre #>
 
         DateTime _DBModel_ShuffledTempDate;
 
-        [JsonIgnore]
+   
         public DateTime DBModel_ShuffledTempDate { get { return <#= tableInfo.ShuffledConfig.ShuffledData#> != DateTime.MinValue ? <#= tableInfo.ShuffledConfig.ShuffledData#><#= shuffledDataCol.IsNullable?" ?? _DBModel_ShuffledTempDate":""
 		#> : _DBModel_ShuffledTempDate; } set { _DBModel_ShuffledTempDate = value; } }
 
